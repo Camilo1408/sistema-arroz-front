@@ -1,0 +1,61 @@
+/* src/index.css */
+
+/* Importaciones de Tailwind — estas 3 líneas son OBLIGATORIAS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS globales */
+:root {
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* Fuente base de la aplicación */
+body {
+  font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  background-color: #f1f5f9; /* slate-100 — fondo muy claro */
+  color: #1e293b; /* slate-800 — texto oscuro */
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar personalizado — hace la UI más limpia */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Clase de utilidad para el canvas de bounding boxes */
+.canvas-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.canvas-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* El canvas no bloquea clics sobre la imagen */
+}
+
+/* Transición suave para cambios de valor en métricas */
+.metric-value {
+  transition: color var(--transition-normal);
+}
