@@ -38,7 +38,7 @@ export function SubsistemaTrilla() {
   const [showSegmentation, setShowSegmentation] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
 
-  // En useEffect donde cargas el historial:
+  // Cargar historial desde BD al montar el componente
   useEffect(() => {
     getHistoryFromDB("trilla", 30)
       .then((response) => {
@@ -54,25 +54,38 @@ export function SubsistemaTrilla() {
       });
   }, []);
 
+  // Maneja la carga y análisis de la imagen
   async function handleFileSelected(file) {
     setIsLoading(true);
     setImageUrl(URL.createObjectURL(file));
+    setShowSegmentation(false); // Reinicia a vista normal
+
     try {
       const data = await analyzeImage("trilla", file);
       setResult(data);
+
+      // Actualiza el historial con el nuevo resultado
       setHistory((prev) => [
         ...prev.slice(-29),
         {
-          id: prev.length + 1,
+          id: Date.now(),
           subsystem: "trilla",
           timestamp: data.frame_id,
           latency_ms: data.latency_ms,
-          broken_grain_pct: data.indicators.broken_grain_pct,
+          s2_broken_pct: data.indicators.broken_grain_pct,
+          s2_intact_pct: data.indicators.intact_grain_pct,
+          s2_straw_pct: data.indicators.straw_pct,
           alert_count: data.alerts.length,
+          status: data.alerts.some((a) => a.level === "CRITICO")
+            ? "CRITICO"
+            : data.alerts.some((a) => a.level === "ATENCION")
+              ? "ATENCION"
+              : "NORMAL",
         },
       ]);
     } catch (err) {
       console.error("Error análisis S2:", err);
+      alert("Error al analizar la imagen: " + err.message);
     } finally {
       setIsLoading(false);
     }
@@ -136,26 +149,41 @@ export function SubsistemaTrilla() {
               </h3>
               <div className="flex items-center gap-2">
                 {overallStatus && <StatusBadge level={overallStatus} />}
+
                 {/* Toggle entre imagen original y mapa de segmentación */}
-                {result && (
-                  <button
-                    onClick={() => setShowSegmentation((p) => !p)}
-                    className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-                  >
-                    {showSegmentation
-                      ? "← Imagen original"
-                      : "Ver segmentación →"}
-                  </button>
+                {result && ind?.segmentation_map_b64 && (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setShowSegmentation(false)}
+                      className={`text-xs font-medium rounded-lg px-3 py-1.5 transition-colors ${
+                        !showSegmentation
+                          ? "bg-green-100 text-green-700 border border-green-300"
+                          : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
+                      }`}
+                    >
+                      ✓ Normal
+                    </button>
+                    <button
+                      onClick={() => setShowSegmentation(true)}
+                      className={`text-xs font-medium rounded-lg px-3 py-1.5 transition-colors ${
+                        showSegmentation
+                          ? "bg-blue-100 text-blue-700 border border-blue-300"
+                          : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
+                      }`}
+                    >
+                      🎨 Ver segmentación
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Imagen o mapa de segmentación */}
-            <div className="bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-48">
+            <div className="bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-80">
               {imageUrl ? (
-                showSegmentation && ind?.segmentation_map_url ? (
+                showSegmentation && ind?.segmentation_map_b64 ? (
                   <img
-                    src={ind.segmentation_map_url}
+                    src={ind.segmentation_map_b64}
                     alt="Mapa de segmentación semántica"
                     className="w-full h-auto max-h-96 object-contain"
                   />
@@ -173,16 +201,15 @@ export function SubsistemaTrilla() {
                     Carga una imagen del flujo de trilla
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
-                    El modelo clasificará las ventanas de 32×32 px por clase de
-                    material
+                    El modelo clasificará píxeles por clase de material
                   </p>
                 </div>
               )}
             </div>
 
             {/* Leyenda del mapa de segmentación */}
-            {showSegmentation && (
-              <div className="flex gap-4 mt-3">
+            {result && (
+              <div className="flex gap-4 mt-4">
                 {[
                   { label: "Grano íntegro", color: SEGMENT_COLORS.intact },
                   { label: "Grano roto", color: SEGMENT_COLORS.broken },
@@ -323,7 +350,7 @@ export function SubsistemaTrilla() {
         </div>
         <TrendChart
           data={history}
-          dataKey="broken_grain_pct"
+          dataKey="s2_broken_pct"
           label="Grano roto"
           color="#ef4444"
           threshold={BROKEN_CRITICAL}
