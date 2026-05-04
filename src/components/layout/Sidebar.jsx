@@ -38,7 +38,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onClose }) {
   return (
     <aside
       className="flex flex-col h-screen sticky top-0 shrink-0"
@@ -50,6 +50,7 @@ export function Sidebar() {
       {/* Logo */}
       <Link
         to="/"
+        onClick={() => onClose?.()}
         className="flex items-center gap-3 px-5 py-4 border-b border-green-800/40 hover:bg-green-900/30 transition-colors"
       >
         <div className="w-9 h-9 bg-gradient-to-br from-green-400 to-green-700 rounded-xl flex items-center justify-center shadow-lg shadow-green-950/60 flex-shrink-0">
@@ -84,6 +85,7 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.end}
+            onClick={() => onClose?.()}
             className={({ isActive }) =>
               clsx(
                 "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150",

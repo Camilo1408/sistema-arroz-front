@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Activity, Home, ChevronRight } from "lucide-react";
+import { Activity, Home, ChevronRight, Menu } from "lucide-react";
 
 const ROUTE_META = {
   "/dashboard": {
@@ -35,7 +35,7 @@ const ROUTE_META = {
   },
 };
 
-export function Header() {
+export function Header({ onToggleSidebar }) {
   const { pathname } = useLocation();
   const meta = ROUTE_META[pathname] || ROUTE_META["/dashboard"];
   const [time, setTime] = useState(new Date());
@@ -60,8 +60,17 @@ export function Header() {
       className="flex items-center justify-between px-6 border-b border-stone-200 bg-white/90 backdrop-blur-sm"
       style={{ height: "var(--header-height)", minHeight: "var(--header-height)" }}
     >
+      {/* Hamburger — mobile/tablet only */}
+      <button
+        onClick={onToggleSidebar}
+        className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-stone-500 hover:bg-stone-100 transition-colors mr-3 flex-shrink-0"
+        aria-label="Abrir menú"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Left: breadcrumb + title */}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 mb-0.5">
           <Link to="/dashboard" className="text-stone-400 hover:text-green-600 transition-colors">

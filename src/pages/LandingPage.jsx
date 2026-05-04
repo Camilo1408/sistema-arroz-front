@@ -365,7 +365,7 @@ export default function LandingPage() {
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-700 rounded-lg flex items-center justify-center shadow-md">
@@ -450,24 +450,24 @@ export default function LandingPage() {
         <div className="absolute top-1/4 right-1/3 w-96 h-96 rounded-full bg-green-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 left-1/4 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 grid lg:grid-cols-2 gap-12 items-center w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-10 md:pt-20 md:pb-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
           {/* Left: copy */}
-          <div className="space-y-8">
+          <div className="space-y-5 md:space-y-8">
             <div className="fade-up-1 inline-flex items-center gap-2 bg-green-950/70 border border-green-400/40 text-green-200 text-xs font-semibold px-3 py-1.5 rounded-full">
               <CircleDot className="w-3 h-3 animate-pulse" />
               Monitoreo en Tiempo Real · IA + Visión Computacional
             </div>
 
-            <h1 className="fade-up-2 font-display text-5xl lg:text-6xl font-bold text-green-600 leading-tight tracking-tight">
+            <h1 className="fade-up-2 font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-green-600 leading-tight tracking-tight">
               Cosecha de Arroz
               <br />
-              <span className="text-amber-400">Más Inteligente.</span>
+              <span className="text-green-900">Más Inteligente.</span>
             </h1>
 
             <p className="fade-up-3 text-green-600 text-lg leading-relaxed max-w-lg">
               Sistema de visión computacional que monitorea los tres subsistemas
               críticos de la cosechadora —{" "}
-              <strong className="text-green-800">
+              <strong className="text-green-900">
                 Corte, Trilla y Limpieza
               </strong>{" "}
               — detectando pérdidas y anomalías en tiempo real para maximizar el
@@ -484,7 +484,7 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#sistema"
-                className="inline-flex items-center gap-2 border border-green-400/60 text-green-600 hover:text-green-400 hover:border-green-400 font-medium px-6 py-3 rounded-xl transition-all"
+                className="inline-flex items-center gap-2 border border-green-500 text-green-700 hover:text-green-400 hover:border-green-400 font-medium px-6 py-3 rounded-xl transition-all"
               >
                 Conocer el Sistema
                 <ChevronRight className="w-4 h-4" />
@@ -499,7 +499,7 @@ export default function LandingPage() {
                 { v: "94%", l: "precisión" },
               ].map((s) => (
                 <div key={s.l}>
-                  <div className="text-green-600 font-bold text-xl font-mono">
+                  <div className="text-green-800 font-bold text-xl font-mono">
                     {s.v}
                   </div>
                   <div className="text-green-400 text-xs font-medium">
@@ -511,7 +511,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right: visual */}
-          <div className="fade-up-3 relative h-96 lg:h-[520px]">
+          <div className="fade-up-3 relative h-64 sm:h-80 md:h-96 lg:h-[520px]">
             <FieldVisual />
           </div>
         </div>
@@ -538,10 +538,10 @@ export default function LandingPage() {
           {STATS.map((s, i) => (
             <div
               key={i}
-              className="text-center p-6 bg-white rounded-2xl shadow-sm border border-stone-100 card-hover"
+              className="text-center p-4 sm:p-6 bg-white rounded-2xl shadow-sm border border-stone-100 card-hover"
             >
               <div
-                className={`text-3xl font-bold font-mono font-display ${s.color}`}
+                className={`text-2xl sm:text-3xl font-bold font-mono font-display ${s.color}`}
               >
                 {s.value}
               </div>
@@ -554,13 +554,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────────────────────── */}
-      <section id="sistema" className="py-24 bg-white">
+      <section id="sistema" className="py-12 md:py-20 lg:py-24 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-green-200">
               <Activity className="w-3.5 h-3.5" /> Cómo Funciona
             </div>
-            <h2 className="font-display text-4xl font-bold text-stone-900">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900">
               Del campo al <span className="gradient-text">diagnóstico</span> en
               milisegundos
             </h2>
@@ -600,13 +600,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── SUBSYSTEMS ──────────────────────────────────────────── */}
-      <section id="subsistemas" className="py-24 bg-stone-50">
+      <section id="subsistemas" className="py-12 md:py-20 lg:py-24 bg-stone-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-amber-200">
               <Layers className="w-3.5 h-3.5" /> Subsistemas Monitoreados
             </div>
-            <h2 className="font-display text-4xl font-bold text-stone-900">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900">
               Cobertura <span className="gradient-text">total</span> de la
               cosechadora
             </h2>
@@ -616,7 +616,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {SUBSYSTEMS.map((sys) => (
               <div
                 key={sys.id}
@@ -680,13 +680,16 @@ export default function LandingPage() {
       </section>
 
       {/* ── TECHNOLOGY ──────────────────────────────────────────── */}
-      <section id="tecnologia" className="py-24 bg-white tech-grid">
+      <section
+        id="tecnologia"
+        className="py-12 md:py-20 lg:py-24 bg-white tech-grid"
+      >
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-blue-200">
               <Cpu className="w-3.5 h-3.5" /> Tecnología IA
             </div>
-            <h2 className="font-display text-4xl font-bold text-stone-900">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900">
               Inteligencia Artificial{" "}
               <span className="gradient-text-blue">aplicada al campo</span>
             </h2>
@@ -720,7 +723,7 @@ export default function LandingPage() {
       {/* ── SUSTAINABILITY ──────────────────────────────────────── */}
       <section
         id="sostenibilidad"
-        className="py-24 relative overflow-hidden"
+        className="py-12 md:py-20 lg:py-24 relative overflow-hidden"
         style={{
           background:
             "linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)",
@@ -736,7 +739,7 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-2 bg-green-900/60 border border-green-500/30 text-green-300 text-xs font-medium px-3 py-1.5 rounded-full mb-4">
               <Leaf className="w-3.5 h-3.5" /> Impacto Ambiental
             </div>
-            <h2 className="font-display text-4xl font-bold text-white">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white">
               Agricultura más <span className="text-green-400">sostenible</span>
             </h2>
             <p className="text-green-100/70 mt-3 max-w-xl mx-auto">
@@ -797,13 +800,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="bg-gradient-to-br from-green-50 to-amber-50 border border-green-100 rounded-3xl p-12 shadow-sm">
+      <section className="py-12 md:py-20 lg:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <div className="bg-gradient-to-br from-green-50 to-amber-50 border border-green-100 rounded-3xl p-6 sm:p-8 md:p-12 shadow-sm">
             <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/30 animate-float">
               <Wheat className="w-8 h-8 text-white" />
             </div>
-            <h2 className="font-display text-3xl font-bold text-stone-900 mb-3">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-stone-900 mb-3">
               Listo para optimizar tu cosecha
             </h2>
             <p className="text-stone-500 mb-8 max-w-md mx-auto">
@@ -845,7 +848,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="text-center text-xs text-green-600">
-              Proyecto de investigación — Ingeniería de Software
+              Proyecto de Visión Artificial — Ingeniería de Software
               <br />
               Universidad Surcolombiana · Neiva, Huila ·{" "}
               {new Date().getFullYear()}
