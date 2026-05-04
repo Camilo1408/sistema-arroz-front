@@ -1,48 +1,90 @@
-// src/pages/SubsistemaLimpieza.jsx
-// ============================================================
-// VISTA S3 — SISTEMA DE LIMPIEZA
-// ============================================================
-// Muestra la composición del flujo de salida: grano íntegro,
-// grano roto y material no-grano. El indicador crítico es el
-// % de material no-grano (umbral: 2.0%).
-
 import { useState, useEffect } from "react";
-import { Download, Wind } from "lucide-react";
-import { MetricCard } from "@/components/shared/MetricCard.jsx";
-import { AlertBanner } from "@/components/shared/AlertBanner.jsx";
-import { ImageCanvas } from "@/components/shared/ImageCanvas.jsx";
+import { Download, Wind, Activity, TrendingUp, Cpu, AlertTriangle } from "lucide-react";
+import { MetricCard }    from "@/components/shared/MetricCard.jsx";
+import { AlertBanner }   from "@/components/shared/AlertBanner.jsx";
+import { ImageCanvas }   from "@/components/shared/ImageCanvas.jsx";
 import { CompositionBar } from "@/components/shared/CompositionBar.jsx";
-import { TrendChart } from "@/components/shared/TrendChart.jsx";
-import { FileUpload } from "@/components/shared/FileUpload.jsx";
-import { StatusBadge } from "@/components/shared/StatusBadge.jsx";
-import {
-  analyzeImage,
-  getHistoryFromDB,
-  exportDiagnosticCSV,
-} from "@/services/api.ts";
+import { TrendChart }    from "@/components/shared/TrendChart.jsx";
+import { FileUpload }    from "@/components/shared/FileUpload.jsx";
+import { StatusBadge }   from "@/components/shared/StatusBadge.jsx";
+import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV } from "@/services/api.ts";
+import clsx from "clsx";
 
-const NON_GRAIN_WARNING = 1.5;
+const NON_GRAIN_WARNING  = 1.5;
 const NON_GRAIN_CRITICAL = 2.0;
 
+function Panel({ title, icon: Icon, badge, badgeColor, action, children, className }) {
+  return (
+    <div className={clsx("bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden", className)}>
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100">
+        <div className="flex items-center gap-2.5">
+          {badge && (
+            <span className={clsx("text-[11px] font-bold font-mono text-white px-1.5 py-0.5 rounded-md", badgeColor)}>
+              {badge}
+            </span>
+          )}
+          {Icon && <Icon className="w-4 h-4 text-stone-400" />}
+          <h3 className="font-display font-semibold text-stone-700 text-sm">{title}</h3>
+        </div>
+        {action}
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+function CriticalGauge({ value, level, warning, critical, label, note }) {
+  const STYLES = {
+    NORMAL:   { wrap: "bg-green-50 border-green-200",  val: "text-green-700",  bar: "bg-green-500", fill: "bg-green-500"  },
+    ATENCION: { wrap: "bg-amber-50 border-amber-200",  val: "text-amber-700",  bar: "bg-amber-500", fill: "bg-amber-500"  },
+    CRITICO:  { wrap: "bg-red-50 border-red-200",      val: "text-red-700",    bar: "bg-red-500",   fill: "bg-red-500"    },
+  };
+  const s = STYLES[level ?? "NORMAL"];
+  const pct = value !== null ? Math.min((value / (critical * 2)) * 100, 100) : 0;
+
+  return (
+    <div className={clsx("rounded-2xl border-2 p-5 relative overflow-hidden", s.wrap)}>
+      <div className={clsx("absolute left-0 top-0 bottom-0 w-1", s.bar)} />
+      <div className="pl-2">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">{label}</p>
+          {level && <StatusBadge level={level} size="sm" />}
+        </div>
+
+        <p className={clsx("text-5xl font-bold font-mono leading-none mt-2", s.val)}>
+          {value !== null ? `${value.toFixed(1)}%` : "—"}
+        </p>
+
+        <div className="mt-4 space-y-1">
+          <div className="h-2.5 bg-stone-200/60 rounded-full overflow-hidden">
+            <div className={clsx("h-full rounded-full transition-all duration-700", s.fill)} style={{ width: `${pct}%` }} />
+          </div>
+          <div className="relative h-3">
+            <div className="absolute h-3 w-px bg-amber-400" style={{ left: `${(warning / (critical * 2)) * 100}%` }}>
+              <span className="absolute top-3 left-1 text-[9px] text-amber-600 whitespace-nowrap">{warning}%</span>
+            </div>
+            <div className="absolute h-3 w-px bg-red-400" style={{ left: `${(critical / (critical * 2)) * 100}%` }}>
+              <span className="absolute top-3 left-1 text-[9px] text-red-600 whitespace-nowrap">{critical}%</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-stone-400 mt-6">{note}</p>
+      </div>
+    </div>
+  );
+}
+
 export function SubsistemaLimpieza() {
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [result,    setResult]    = useState(null);
+  const [history,   setHistory]   = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [imageUrl,  setImageUrl]  = useState(null);
 
   useEffect(() => {
     getHistoryFromDB("limpieza", 30)
-      .then((response) => {
-        // response puede ser array directo o { records: [...] }
-        const records = Array.isArray(response)
-          ? response
-          : response?.records || [];
-        setHistory(records);
-      })
-      .catch((err) => {
-        console.error("Error cargando historial:", err);
-        setHistory([]);
-      });
+      .then(res => setHistory(Array.isArray(res) ? res : res?.records || []))
+      .catch(() => setHistory([]));
   }, []);
 
   async function handleFileSelected(file) {
@@ -51,18 +93,15 @@ export function SubsistemaLimpieza() {
     try {
       const data = await analyzeImage("limpieza", file);
       setResult(data);
-      setHistory((prev) => [
-        ...prev.slice(-29),
-        {
-          id: prev.length + 1,
-          subsystem: "limpieza",
-          timestamp: data.frame_id,
-          latency_ms: data.latency_ms,
-          non_grain_pct: data.indicators.non_grain_pct,
-          broken_grain_pct: data.indicators.broken_grain_pct,
-          alert_count: data.alerts.length,
-        },
-      ]);
+      setHistory(prev => [...prev.slice(-29), {
+        id: Date.now(),
+        subsystem: "limpieza",
+        timestamp: data.frame_id,
+        latency_ms: data.latency_ms,
+        non_grain_pct:   data.indicators.non_grain_pct,
+        broken_grain_pct: data.indicators.broken_grain_pct,
+        alert_count: data.alerts.length,
+      }]);
     } catch (err) {
       console.error("Error análisis S3:", err);
     } finally {
@@ -70,180 +109,129 @@ export function SubsistemaLimpieza() {
     }
   }
 
-  const ind = result?.indicators;
-  const alerts = result?.alerts || [];
+  const ind        = result?.indicators;
+  const alerts     = result?.alerts || [];
   const detections = result?.detections || [];
 
-  const nonGrainLevel = !ind
-    ? null
-    : ind.non_grain_pct >= NON_GRAIN_CRITICAL
-      ? "CRITICO"
-      : ind.non_grain_pct >= NON_GRAIN_WARNING
-        ? "ATENCION"
-        : "NORMAL";
+  const nonGrainLevel = !ind ? null
+    : ind.non_grain_pct >= NON_GRAIN_CRITICAL ? "CRITICO"
+    : ind.non_grain_pct >= NON_GRAIN_WARNING  ? "ATENCION"
+    : "NORMAL";
 
-  const overallStatus = alerts.some((a) => a.level === "CRITICO")
-    ? "CRITICO"
-    : alerts.some((a) => a.level === "ATENCION")
-      ? "ATENCION"
-      : result
-        ? "NORMAL"
-        : null;
+  const overallStatus = alerts.some(a => a.level === "CRITICO") ? "CRITICO"
+    : alerts.some(a => a.level === "ATENCION") ? "ATENCION"
+    : result ? "NORMAL" : null;
 
-  const compositionSegments = ind
-    ? [
-        {
-          label: "Grano íntegro",
-          value: ind.intact_grain_pct,
-          color: "#22c55e",
-        },
-        { label: "Grano roto", value: ind.broken_grain_pct, color: "#f97316" },
-        {
-          label: "Material no-grano",
-          value: ind.non_grain_pct,
-          color: "#ef4444",
-        },
-      ]
-    : [];
+  const compositionSegments = ind ? [
+    { label: "Grano Íntegro",     value: ind.intact_grain_pct,    color: "#22c55e" },
+    { label: "Grano Roto",        value: ind.broken_grain_pct,    color: "#f97316" },
+    { label: "Material No-Grano", value: ind.non_grain_pct,       color: "#ef4444" },
+  ] : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 max-w-screen-xl mx-auto w-full">
+
       {alerts.length > 0 && (
         <div className="space-y-2">
-          {alerts.map((a) => (
-            <AlertBanner key={a.id} alert={a} />
-          ))}
+          {alerts.map(a => <AlertBanner key={a.id} alert={a} />)}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Imagen con bounding boxes */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+        {/* Left: image + upload */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">
-                Flujo de Salida — Limpieza
-              </h3>
-              {overallStatus && <StatusBadge level={overallStatus} />}
-            </div>
-            <ImageCanvas
-              imageUrl={imageUrl}
-              detections={detections}
-              imageWidth={640}
-              imageHeight={640}
-            />
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Cargar Frame del Sistema de Limpieza
-            </h3>
-            <FileUpload
-              onFileSelected={handleFileSelected}
-              accept="both"
-              isLoading={isLoading}
-            />
-          </div>
+          <Panel
+            title="Flujo de Salida — Sistema de Limpieza"
+            badge="S3" badgeColor="bg-blue-500"
+            icon={Activity}
+            action={overallStatus && <StatusBadge level={overallStatus} />}
+          >
+            <ImageCanvas imageUrl={imageUrl} detections={detections} imageWidth={640} imageHeight={640} />
+          </Panel>
+
+          <Panel title="Cargar Frame del Sistema de Limpieza" icon={Cpu}>
+            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+            <p className="text-xs text-stone-400 mt-3 text-center">
+              El modelo detectará grano íntegro, roto y material no-grano en la salida
+            </p>
+          </Panel>
         </div>
 
-        {/* Indicadores */}
+        {/* Right: indicators */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Indicador crítico: material no-grano */}
-          <div
-            className={`rounded-xl border-2 p-5 ${
-              nonGrainLevel === "CRITICO"
-                ? "bg-red-50 border-red-300"
-                : nonGrainLevel === "ATENCION"
-                  ? "bg-yellow-50 border-yellow-300"
-                  : "bg-green-50 border-green-200"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Material No-Grano — Indicador Crítico
-              </p>
-              {nonGrainLevel && <StatusBadge level={nonGrainLevel} size="sm" />}
-            </div>
-            <p
-              className={`text-4xl font-bold mt-1 ${
-                nonGrainLevel === "CRITICO"
-                  ? "text-red-700"
-                  : nonGrainLevel === "ATENCION"
-                    ? "text-yellow-700"
-                    : "text-green-700"
-              }`}
-            >
-              {ind ? `${ind.non_grain_pct.toFixed(1)}%` : "—"}
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Umbral crítico: {NON_GRAIN_CRITICAL}% · Por área de bounding box
-              ponderada
-            </p>
-            {ind?.recommended_action && (
-              <p className="text-xs text-red-700 font-medium mt-2 flex items-center gap-1">
-                <Wind size={12} /> {ind.recommended_action}
-              </p>
-            )}
-          </div>
 
-          {/* Métricas individuales */}
-          <div className="space-y-3">
+          <CriticalGauge
+            label="Material No-Grano — Indicador Crítico"
+            value={ind?.non_grain_pct ?? null}
+            level={nonGrainLevel}
+            warning={NON_GRAIN_WARNING}
+            critical={NON_GRAIN_CRITICAL}
+            note={`Atención: ${NON_GRAIN_WARNING}% · Crítico: ${NON_GRAIN_CRITICAL}% · Calculado por área de bbox ponderada`}
+          />
+
+          {ind?.recommended_action && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Wind className="w-4 h-4 text-red-600" />
+                <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Acción Recomendada</p>
+              </div>
+              <p className="text-sm text-red-800">{ind.recommended_action}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-3">
             <MetricCard
               title="Grano Íntegro"
               value={ind ? `${ind.intact_grain_pct.toFixed(1)}%` : "—"}
               color="green"
-              subtitle="Debe maximizarse"
+              subtitle="Objetivo: maximizar ↑"
             />
             <MetricCard
               title="Grano Roto"
               value={ind ? `${ind.broken_grain_pct.toFixed(1)}%` : "—"}
               color={ind?.broken_grain_pct > 3 ? "yellow" : "gray"}
-              subtitle="Indica calidad degradada del producto"
+              subtitle="Calidad degradada del producto"
             />
             <MetricCard
               title="Partículas Detectadas"
               value={ind?.total_detections ?? "—"}
+              icon={<AlertTriangle size={16} />}
               color="blue"
               subtitle="Total de objetos en el frame"
             />
             <MetricCard
               title="Latencia de Inferencia"
-              value={result ? `${result.latency_ms.toFixed(1)}` : "—"}
+              value={result ? result.latency_ms.toFixed(1) : "—"}
               unit="ms"
+              icon={<Cpu size={16} />}
               color="blue"
             />
           </div>
 
-          {/* Barra de composición */}
           {compositionSegments.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <CompositionBar
-                title="Composición del Flujo de Salida"
-                segments={compositionSegments}
-              />
-            </div>
+            <Panel title="Composición del Flujo de Salida" icon={Wind}>
+              <CompositionBar segments={compositionSegments} />
+            </Panel>
           )}
         </div>
       </div>
 
-      {/* Gráficas + exportar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-gray-900">
-                Tendencia — Material No-Grano
-              </h3>
-              <p className="text-xs text-gray-500">
-                Indicador crítico del sistema de limpieza
-              </p>
-            </div>
+      {/* Trend charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Panel
+          title="Tendencia — Material No-Grano"
+          badge="S3" badgeColor="bg-blue-500"
+          icon={TrendingUp}
+          action={
             <button
               onClick={() => exportDiagnosticCSV("limpieza")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-stone-500 hover:text-green-600 border border-stone-200 hover:border-green-300 px-2.5 py-1.5 rounded-lg transition-all"
             >
-              <Download size={16} /> CSV
+              <Download className="w-3.5 h-3.5" /> CSV
             </button>
-          </div>
+          }
+        >
           <TrendChart
             data={history}
             dataKey="non_grain_pct"
@@ -252,16 +240,15 @@ export function SubsistemaLimpieza() {
             threshold={NON_GRAIN_CRITICAL}
             unit="%"
             xKey="timestamp"
+            filled
           />
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="font-semibold text-gray-900 mb-1">
-            Tendencia — Grano Roto
-          </h3>
-          <p className="text-xs text-gray-500 mb-4">
-            Calidad del producto en flujo de salida
-          </p>
+        <Panel
+          title="Tendencia — Grano Roto"
+          badge="S3" badgeColor="bg-blue-500"
+          icon={TrendingUp}
+        >
           <TrendChart
             data={history}
             dataKey="broken_grain_pct"
@@ -269,8 +256,9 @@ export function SubsistemaLimpieza() {
             color="#f97316"
             unit="%"
             xKey="timestamp"
+            filled
           />
-        </div>
+        </Panel>
       </div>
     </div>
   );

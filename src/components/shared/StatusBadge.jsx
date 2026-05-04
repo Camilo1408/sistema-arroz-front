@@ -1,41 +1,29 @@
-// src/components/shared/StatusBadge.jsx
-// Badge compacto que muestra NORMAL / ATENCIÓN / CRÍTICO.
-// Se usa en las tarjetas resumen del Dashboard General.
-
 import clsx from "clsx";
+import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 
-/**
- * @param {object} props
- * @param {'NORMAL'|'ATENCION'|'CRITICO'} props.level
- * @param {'sm'|'md'} [props.size]
- */
+const CONFIG = {
+  NORMAL:   { bg: "bg-green-50",  border: "border-green-200", text: "text-green-700", Icon: CheckCircle2, label: "Normal"   },
+  ATENCION: { bg: "bg-amber-50",  border: "border-amber-200", text: "text-amber-700", Icon: AlertTriangle, label: "Atención" },
+  CRITICO:  { bg: "bg-red-50",    border: "border-red-200",   text: "text-red-700",   Icon: XCircle,      label: "Crítico"  },
+};
+
+const SIZES = {
+  sm: { badge: "px-2 py-0.5 text-[11px] gap-1", icon: 11 },
+  md: { badge: "px-2.5 py-1 text-xs gap-1.5",   icon: 13 },
+};
+
 export function StatusBadge({ level, size = "md" }) {
-  const styles = {
-    NORMAL: "bg-green-100 text-green-800 ring-1 ring-green-300",
-    ATENCION: "bg-yellow-100 text-yellow-800 ring-1 ring-yellow-300",
-    CRITICO: "bg-red-100 text-red-800 ring-1 ring-red-300 animate-pulse",
-  };
-
-  const labels = {
-    NORMAL: "✓ Normal",
-    ATENCION: "⚠ Atención",
-    CRITICO: "● Crítico",
-  };
-
-  const sizeStyles = {
-    sm: "px-2 py-0.5 text-xs",
-    md: "px-2.5 py-1 text-sm",
-  };
+  const cfg = CONFIG[level] ?? CONFIG.NORMAL;
+  const sz  = SIZES[size];
 
   return (
-    <span
-      className={clsx(
-        "rounded-full font-semibold inline-flex items-center",
-        styles[level],
-        sizeStyles[size],
-      )}
-    >
-      {labels[level]}
+    <span className={clsx(
+      "inline-flex items-center font-semibold rounded-full border",
+      cfg.bg, cfg.border, cfg.text, sz.badge,
+      level === "CRITICO" && "animate-pulse"
+    )}>
+      <cfg.Icon size={sz.icon} />
+      {cfg.label}
     </span>
   );
 }

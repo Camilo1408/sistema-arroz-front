@@ -1,353 +1,298 @@
-// src/pages/SubsistemaTrilla.jsx
-// ============================================================
-// VISTA S2 — ZONA DE TRILLA
-// ============================================================
-// Muestra la composición del flujo de material (grano íntegro,
-// grano roto, paja) mediante segmentación semántica.
-// El indicador crítico es el % de grano roto (umbral: 0.5%).
-
 import { useState, useEffect } from "react";
-import { Download, AlertTriangle } from "lucide-react";
-import { MetricCard } from "@/components/shared/MetricCard.jsx";
-import { AlertBanner } from "@/components/shared/AlertBanner.jsx";
+import { Download, AlertTriangle, Activity, TrendingUp, Cpu, Layers } from "lucide-react";
+import { MetricCard }    from "@/components/shared/MetricCard.jsx";
+import { AlertBanner }   from "@/components/shared/AlertBanner.jsx";
 import { CompositionBar } from "@/components/shared/CompositionBar.jsx";
-import { TrendChart } from "@/components/shared/TrendChart.jsx";
-import { FileUpload } from "@/components/shared/FileUpload.jsx";
-import { StatusBadge } from "@/components/shared/StatusBadge.jsx";
-import {
-  analyzeImage,
-  getHistoryFromDB,
-  exportDiagnosticCSV,
-} from "@/services/api.ts";
+import { TrendChart }    from "@/components/shared/TrendChart.jsx";
+import { FileUpload }    from "@/components/shared/FileUpload.jsx";
+import { StatusBadge }   from "@/components/shared/StatusBadge.jsx";
+import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV } from "@/services/api.ts";
+import clsx from "clsx";
 
-// Umbrales del proyecto (sección 5.8 del documento)
-const BROKEN_WARNING = 0.3; // %
-const BROKEN_CRITICAL = 0.5; // %
+const BROKEN_WARNING  = 0.3;
+const BROKEN_CRITICAL = 0.5;
 
-// Colores del mapa de segmentación
-const SEGMENT_COLORS = {
-  intact: "#22c55e", // verde — grano íntegro
-  broken: "#ef4444", // rojo — grano roto
-  straw: "#eab308", // amarillo — paja
+const SEG_COLORS = {
+  intact: "#22c55e",
+  broken: "#ef4444",
+  straw:  "#f59e0b",
 };
 
-export function SubsistemaTrilla() {
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSegmentation, setShowSegmentation] = useState(false);
-  const [imageUrl, setImageUrl] = useState(null);
+function Panel({ title, icon: Icon, badge, badgeColor, action, children, className }) {
+  return (
+    <div className={clsx("bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden", className)}>
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100">
+        <div className="flex items-center gap-2.5">
+          {badge && (
+            <span className={clsx("text-[11px] font-bold font-mono text-white px-1.5 py-0.5 rounded-md", badgeColor)}>
+              {badge}
+            </span>
+          )}
+          {Icon && <Icon className="w-4 h-4 text-stone-400" />}
+          <h3 className="font-display font-semibold text-stone-700 text-sm">{title}</h3>
+        </div>
+        {action}
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
 
-  // Cargar historial desde BD al montar el componente
+function CriticalGauge({ value, level, warning, critical }) {
+  const STYLES = {
+    NORMAL:   { wrap: "bg-green-50 border-green-200",  val: "text-green-700",  bar: "bg-green-500", fill: "bg-green-500"  },
+    ATENCION: { wrap: "bg-amber-50 border-amber-200",  val: "text-amber-700",  bar: "bg-amber-500", fill: "bg-amber-500"  },
+    CRITICO:  { wrap: "bg-red-50 border-red-200",      val: "text-red-700",    bar: "bg-red-500",   fill: "bg-red-500"    },
+  };
+  const s = STYLES[level ?? "NORMAL"];
+  const pct = value !== null ? Math.min((value / (critical * 2)) * 100, 100) : 0;
+
+  return (
+    <div className={clsx("rounded-2xl border-2 p-5 relative overflow-hidden", s.wrap)}>
+      <div className={clsx("absolute left-0 top-0 bottom-0 w-1", s.bar)} />
+      <div className="pl-2">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+            Grano Roto — Indicador Crítico
+          </p>
+          {level && <StatusBadge level={level} size="sm" />}
+        </div>
+
+        <p className={clsx("text-5xl font-bold font-mono leading-none mt-2", s.val)}>
+          {value !== null ? `${value.toFixed(2)}%` : "—"}
+        </p>
+
+        {/* Progress bar */}
+        <div className="mt-4 space-y-1">
+          <div className="h-2.5 bg-stone-200/60 rounded-full overflow-hidden">
+            <div
+              className={clsx("h-full rounded-full transition-all duration-700", s.fill)}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          {/* Threshold markers */}
+          <div className="relative h-3">
+            <div className="absolute h-3 w-px bg-amber-400" style={{ left: `${(warning / (critical * 2)) * 100}%` }}>
+              <span className="absolute top-3 left-1 text-[9px] text-amber-600 whitespace-nowrap">{warning}%</span>
+            </div>
+            <div className="absolute h-3 w-px bg-red-400" style={{ left: `${(critical / (critical * 2)) * 100}%` }}>
+              <span className="absolute top-3 left-1 text-[9px] text-red-600 whitespace-nowrap">{critical}%</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-stone-400 mt-6">
+          Atención: {warning}% · Crítico: {critical}% · Reducir velocidad de cilindro si supera umbral
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function SubsistemaTrilla() {
+  const [result,          setResult]          = useState(null);
+  const [history,         setHistory]         = useState([]);
+  const [isLoading,       setIsLoading]       = useState(false);
+  const [showSegmentation, setShowSegmentation] = useState(false);
+  const [imageUrl,        setImageUrl]        = useState(null);
+
   useEffect(() => {
     getHistoryFromDB("trilla", 30)
-      .then((response) => {
-        // response puede ser array directo o { records: [...] }
-        const records = Array.isArray(response)
-          ? response
-          : response?.records || [];
-        setHistory(records);
-      })
-      .catch((err) => {
-        console.error("Error cargando historial:", err);
-        setHistory([]);
-      });
+      .then(res => setHistory(Array.isArray(res) ? res : res?.records || []))
+      .catch(() => setHistory([]));
   }, []);
 
-  // Maneja la carga y análisis de la imagen
   async function handleFileSelected(file) {
     setIsLoading(true);
     setImageUrl(URL.createObjectURL(file));
-    setShowSegmentation(false); // Reinicia a vista normal
-
+    setShowSegmentation(false);
     try {
       const data = await analyzeImage("trilla", file);
       setResult(data);
-
-      // Actualiza el historial con el nuevo resultado
-      setHistory((prev) => [
-        ...prev.slice(-29),
-        {
-          id: Date.now(),
-          subsystem: "trilla",
-          timestamp: data.frame_id,
-          latency_ms: data.latency_ms,
-          s2_broken_pct: data.indicators.broken_grain_pct,
-          s2_intact_pct: data.indicators.intact_grain_pct,
-          s2_straw_pct: data.indicators.straw_pct,
-          alert_count: data.alerts.length,
-          status: data.alerts.some((a) => a.level === "CRITICO")
-            ? "CRITICO"
-            : data.alerts.some((a) => a.level === "ATENCION")
-              ? "ATENCION"
-              : "NORMAL",
-        },
-      ]);
+      setHistory(prev => [...prev.slice(-29), {
+        id: Date.now(),
+        subsystem: "trilla",
+        timestamp: data.frame_id,
+        latency_ms: data.latency_ms,
+        s2_broken_pct: data.indicators.broken_grain_pct,
+        s2_intact_pct: data.indicators.intact_grain_pct,
+        s2_straw_pct:  data.indicators.straw_pct,
+        alert_count: data.alerts.length,
+      }]);
     } catch (err) {
       console.error("Error análisis S2:", err);
-      alert("Error al analizar la imagen: " + err.message);
     } finally {
       setIsLoading(false);
     }
   }
 
-  const ind = result?.indicators;
+  const ind    = result?.indicators;
   const alerts = result?.alerts || [];
 
-  // Nivel de alerta para el grano roto
-  const brokenLevel = !ind
-    ? null
-    : ind.broken_grain_pct >= BROKEN_CRITICAL
-      ? "CRITICO"
-      : ind.broken_grain_pct >= BROKEN_WARNING
-        ? "ATENCION"
-        : "NORMAL";
+  const brokenLevel = !ind ? null
+    : ind.broken_grain_pct >= BROKEN_CRITICAL ? "CRITICO"
+    : ind.broken_grain_pct >= BROKEN_WARNING  ? "ATENCION"
+    : "NORMAL";
 
-  const overallStatus = alerts.some((a) => a.level === "CRITICO")
-    ? "CRITICO"
-    : alerts.some((a) => a.level === "ATENCION")
-      ? "ATENCION"
-      : result
-        ? "NORMAL"
-        : null;
+  const overallStatus = alerts.some(a => a.level === "CRITICO") ? "CRITICO"
+    : alerts.some(a => a.level === "ATENCION") ? "ATENCION"
+    : result ? "NORMAL" : null;
 
-  // Segmentos para la barra de composición
-  const compositionSegments = ind
-    ? [
-        {
-          label: "Grano íntegro",
-          value: ind.intact_grain_pct,
-          color: SEGMENT_COLORS.intact,
-        },
-        {
-          label: "Grano roto",
-          value: ind.broken_grain_pct,
-          color: SEGMENT_COLORS.broken,
-        },
-        { label: "Paja", value: ind.straw_pct, color: SEGMENT_COLORS.straw },
-      ]
-    : [];
+  const compositionSegments = ind ? [
+    { label: "Grano Íntegro", value: ind.intact_grain_pct,    color: SEG_COLORS.intact },
+    { label: "Grano Roto",    value: ind.broken_grain_pct,    color: SEG_COLORS.broken },
+    { label: "Paja",          value: ind.straw_pct,           color: SEG_COLORS.straw  },
+  ] : [];
 
   return (
-    <div className="space-y-6">
-      {/* Alertas activas */}
+    <div className="space-y-5 max-w-screen-xl mx-auto w-full">
+
       {alerts.length > 0 && (
         <div className="space-y-2">
-          {alerts.map((a) => (
-            <AlertBanner key={a.id} alert={a} />
-          ))}
+          {alerts.map(a => <AlertBanner key={a.id} alert={a} />)}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Columna izquierda: Imagen / mapa segmentación */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+        {/* Left: image viewer */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">
-                Vista del Flujo de Trilla
-              </h3>
+          <Panel
+            title="Vista del Flujo de Trilla"
+            badge="S2" badgeColor="bg-amber-500"
+            icon={Layers}
+            action={
               <div className="flex items-center gap-2">
                 {overallStatus && <StatusBadge level={overallStatus} />}
-
-                {/* Toggle entre imagen original y mapa de segmentación */}
                 {result && ind?.segmentation_map_b64 && (
-                  <div className="flex gap-1">
+                  <div className="flex rounded-lg overflow-hidden border border-stone-200 text-xs font-medium">
                     <button
                       onClick={() => setShowSegmentation(false)}
-                      className={`text-xs font-medium rounded-lg px-3 py-1.5 transition-colors ${
-                        !showSegmentation
-                          ? "bg-green-100 text-green-700 border border-green-300"
-                          : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
-                      }`}
-                    >
-                      ✓ Normal
+                      className={clsx(
+                        "px-3 py-1.5 transition-colors",
+                        !showSegmentation ? "bg-green-100 text-green-700" : "bg-white text-stone-500 hover:bg-stone-50"
+                      )}>
+                      Original
                     </button>
                     <button
                       onClick={() => setShowSegmentation(true)}
-                      className={`text-xs font-medium rounded-lg px-3 py-1.5 transition-colors ${
-                        showSegmentation
-                          ? "bg-blue-100 text-blue-700 border border-blue-300"
-                          : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
-                      }`}
-                    >
-                      🎨 Ver segmentación
+                      className={clsx(
+                        "px-3 py-1.5 transition-colors",
+                        showSegmentation ? "bg-amber-100 text-amber-700" : "bg-white text-stone-500 hover:bg-stone-50"
+                      )}>
+                      Segmentación
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Imagen o mapa de segmentación */}
-            <div className="bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-80">
+            }
+          >
+            <div className="bg-stone-900 rounded-xl overflow-hidden flex items-center justify-center min-h-72">
               {imageUrl ? (
                 showSegmentation && ind?.segmentation_map_b64 ? (
-                  <img
-                    src={ind.segmentation_map_b64}
-                    alt="Mapa de segmentación semántica"
-                    className="w-full h-auto max-h-96 object-contain"
-                  />
+                  <img src={ind.segmentation_map_b64} alt="Segmentación semántica" className="w-full h-auto max-h-96 object-contain" />
                 ) : (
-                  <img
-                    src={imageUrl}
-                    alt="Frame de trilla"
-                    className="w-full h-auto max-h-96 object-contain"
-                  />
+                  <img src={imageUrl} alt="Frame de trilla" className="w-full h-auto max-h-96 object-contain" />
                 )
               ) : (
-                <div className="text-center text-gray-500 py-16">
-                  <p className="text-4xl mb-3">⚙️</p>
-                  <p className="text-sm">
-                    Carga una imagen del flujo de trilla
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    El modelo clasificará píxeles por clase de material
-                  </p>
+                <div className="text-center text-stone-500 py-12 px-6">
+                  <div className="w-12 h-12 bg-stone-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <Layers className="w-6 h-6 text-stone-500" />
+                  </div>
+                  <p className="text-sm font-medium text-stone-400">Carga un frame de la zona de trilla</p>
+                  <p className="text-xs text-stone-600 mt-1">El modelo clasificará píxeles por clase de material</p>
                 </div>
               )}
             </div>
 
-            {/* Leyenda del mapa de segmentación */}
+            {/* Segmentation legend */}
             {result && (
-              <div className="flex gap-4 mt-4">
+              <div className="flex gap-4 mt-3 pt-3 border-t border-stone-100">
                 {[
-                  { label: "Grano íntegro", color: SEGMENT_COLORS.intact },
-                  { label: "Grano roto", color: SEGMENT_COLORS.broken },
-                  { label: "Paja", color: SEGMENT_COLORS.straw },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-1.5 text-xs text-gray-600"
-                  >
-                    <span
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    {item.label}
+                  { label: "Grano Íntegro", color: SEG_COLORS.intact },
+                  { label: "Grano Roto",    color: SEG_COLORS.broken },
+                  { label: "Paja",          color: SEG_COLORS.straw  },
+                ].map(i => (
+                  <div key={i.label} className="flex items-center gap-1.5 text-xs text-stone-500">
+                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: i.color }} />
+                    {i.label}
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </Panel>
 
-          {/* Carga de archivo */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Cargar Frame de Trilla
-            </h3>
-            <FileUpload
-              onFileSelected={handleFileSelected}
-              accept="both"
-              isLoading={isLoading}
-            />
-          </div>
+          <Panel title="Cargar Frame de Trilla" icon={Cpu}>
+            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+          </Panel>
         </div>
 
-        {/* Columna derecha: Indicadores */}
+        {/* Right: indicators */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Indicador crítico: % grano roto */}
-          <div
-            className={`rounded-xl border-2 p-5 ${
-              brokenLevel === "CRITICO"
-                ? "bg-red-50 border-red-300"
-                : brokenLevel === "ATENCION"
-                  ? "bg-yellow-50 border-yellow-300"
-                  : "bg-green-50 border-green-200"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Grano Roto — Indicador Crítico
-              </p>
-              {brokenLevel && <StatusBadge level={brokenLevel} size="sm" />}
-            </div>
-            <p
-              className={`text-4xl font-bold mt-1 ${
-                brokenLevel === "CRITICO"
-                  ? "text-red-700"
-                  : brokenLevel === "ATENCION"
-                    ? "text-yellow-700"
-                    : "text-green-700"
-              }`}
-            >
-              {ind ? `${ind.broken_grain_pct.toFixed(2)}%` : "—"}
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Umbral crítico: {BROKEN_CRITICAL}% · Umbral atención:{" "}
-              {BROKEN_WARNING}%
-            </p>
-            {brokenLevel === "CRITICO" && (
-              <p className="text-xs text-red-700 font-medium mt-2 flex items-center gap-1">
-                <AlertTriangle size={12} />
-                Reducir velocidad del cilindro de trilla
-              </p>
-            )}
-          </div>
 
-          {/* Métricas individuales */}
-          <div className="space-y-3">
+          <CriticalGauge
+            value={ind?.broken_grain_pct ?? null}
+            level={brokenLevel}
+            warning={BROKEN_WARNING}
+            critical={BROKEN_CRITICAL}
+          />
+
+          <div className="grid grid-cols-1 gap-3">
             <MetricCard
               title="Grano Íntegro"
               value={ind ? `${ind.intact_grain_pct.toFixed(1)}%` : "—"}
               color="green"
-              subtitle="Objetivo: maximizar"
+              subtitle="Objetivo: maximizar ↑"
             />
             <MetricCard
               title="Paja en Flujo"
               value={ind ? `${ind.straw_pct.toFixed(1)}%` : "—"}
               color="gray"
-              subtitle="Material no-grano separado"
+              subtitle="Material residual separado"
             />
             <MetricCard
               title="Latencia de Inferencia"
-              value={result ? `${result.latency_ms.toFixed(1)}` : "—"}
+              value={result ? result.latency_ms.toFixed(1) : "—"}
               unit="ms"
+              icon={<Cpu size={16} />}
               color="blue"
             />
           </div>
 
-          {/* Barra de composición proporcional */}
           {compositionSegments.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <CompositionBar
-                title="Composición del Flujo de Trilla"
-                segments={compositionSegments}
-              />
-            </div>
+            <Panel title="Composición del Flujo" icon={Layers}>
+              <CompositionBar segments={compositionSegments} />
+            </Panel>
           )}
 
-          {/* Indicador de sobrecarga */}
           {ind?.overload_detected && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-red-600 uppercase tracking-wider">
-                ⚠ Sobrecarga Detectada
-              </p>
-              <p className="text-sm text-red-800 mt-1">
-                El flujo de trilla está saturado. Reducir velocidad de avance.
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+                <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Sobrecarga Detectada</p>
+              </div>
+              <p className="text-sm text-red-800 leading-relaxed">
+                El flujo de trilla está saturado. Reducir velocidad de avance de la cosechadora.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Gráficas de tendencia */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              Tendencia — % Grano Roto (S2)
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Evolución del indicador crítico
-            </p>
-          </div>
+      {/* Trend chart */}
+      <Panel
+        title="Tendencia — % Grano Roto (S2)"
+        badge="S2" badgeColor="bg-amber-500"
+        icon={TrendingUp}
+        action={
           <button
             onClick={() => exportDiagnosticCSV("trilla")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-stone-500 hover:text-green-600 border border-stone-200 hover:border-green-300 px-2.5 py-1.5 rounded-lg transition-all"
           >
-            <Download size={16} /> Exportar CSV
+            <Download className="w-3.5 h-3.5" /> Exportar CSV
           </button>
-        </div>
+        }
+      >
         <TrendChart
           data={history}
           dataKey="s2_broken_pct"
@@ -356,8 +301,9 @@ export function SubsistemaTrilla() {
           threshold={BROKEN_CRITICAL}
           unit="%"
           xKey="timestamp"
+          filled
         />
-      </div>
+      </Panel>
     </div>
   );
 }

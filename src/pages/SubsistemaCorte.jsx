@@ -1,275 +1,285 @@
-// src/pages/SubsistemaCorte.jsx
-// ============================================================
-// VISTA S1 — CABEZAL DE CORTE
-// ============================================================
-// Permite al usuario cargar una imagen o video del cabezal de
-// corte y ver: bounding boxes, densidad de panículas,
-// detección de cultivo acamado y mapa de densidad por zona.
-
 import { useState, useEffect } from "react";
-import { Download, Wheat, MapPin } from "lucide-react";
-import { MetricCard } from "@/components/shared/MetricCard.jsx";
-import { AlertBanner } from "@/components/shared/AlertBanner.jsx";
-import { ImageCanvas } from "@/components/shared/ImageCanvas.jsx";
-import { DensityGrid } from "@/components/shared/DensityGrid.jsx";
-import { TrendChart } from "@/components/shared/TrendChart.jsx";
-import { FileUpload } from "@/components/shared/FileUpload.jsx";
-import { StatusBadge } from "@/components/shared/StatusBadge.jsx";
-import {
-  analyzeImage,
-  getHistory,
-  exportDiagnosticCSV,
-} from "@/services/api.ts";
+import { Download, Wheat, MapPin, Cpu, Activity, TrendingUp, Grid3x3 } from "lucide-react";
+import { MetricCard }   from "@/components/shared/MetricCard.jsx";
+import { AlertBanner }  from "@/components/shared/AlertBanner.jsx";
+import { ImageCanvas }  from "@/components/shared/ImageCanvas.jsx";
+import { DensityGrid }  from "@/components/shared/DensityGrid.jsx";
+import { TrendChart }   from "@/components/shared/TrendChart.jsx";
+import { FileUpload }   from "@/components/shared/FileUpload.jsx";
+import { StatusBadge }  from "@/components/shared/StatusBadge.jsx";
+import { analyzeImage, getHistory, exportDiagnosticCSV } from "@/services/api.ts";
+import clsx from "clsx";
 
+/* ── Shared panel wrapper ────────────────────────────────────────── */
+function Panel({ title, icon: Icon, badge, badgeColor, action, children, className }) {
+  return (
+    <div className={clsx("bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden", className)}>
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100">
+        <div className="flex items-center gap-2.5">
+          {badge && (
+            <span className={clsx("text-[11px] font-bold font-mono text-white px-1.5 py-0.5 rounded-md", badgeColor)}>
+              {badge}
+            </span>
+          )}
+          {Icon && <Icon className="w-4 h-4 text-stone-400" />}
+          <h3 className="font-display font-semibold text-stone-700 text-sm">{title}</h3>
+        </div>
+        {action}
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+/* ── Critical metric highlight ───────────────────────────────────── */
+function CriticalMetric({ label, value, level, note, action }) {
+  const STYLES = {
+    NORMAL:   { wrap: "bg-green-50 border-green-200",  val: "text-green-700",  bar: "bg-green-500" },
+    ATENCION: { wrap: "bg-amber-50 border-amber-200",  val: "text-amber-700",  bar: "bg-amber-500" },
+    CRITICO:  { wrap: "bg-red-50 border-red-200",      val: "text-red-700",    bar: "bg-red-500"   },
+  };
+  const s = STYLES[level ?? "NORMAL"];
+
+  return (
+    <div className={clsx("rounded-2xl border-2 p-5 space-y-3 relative overflow-hidden", s.wrap)}>
+      {/* Accent bar */}
+      <div className={clsx("absolute left-0 top-0 bottom-0 w-1", s.bar)} />
+      <div className="pl-2">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">{label}</p>
+          {level && <StatusBadge level={level} size="sm" />}
+        </div>
+        <p className={clsx("text-5xl font-bold font-mono leading-none", s.val)}>{value}</p>
+        <p className="text-xs text-stone-400 mt-2">{note}</p>
+        {action && (
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-red-600">
+            <Activity className="w-3 h-3" /> {action}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Detection pill ──────────────────────────────────────────────── */
+function DetectionRow({ det }) {
+  const isLodging = det.class === "cultivo_acamado";
+  return (
+    <tr className="border-b border-stone-50 hover:bg-stone-50/60 transition-colors">
+      <td className="py-2.5 px-4">
+        <span className={clsx(
+          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+          isLodging ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+        )}>
+          {isLodging ? "🌾 Acamado" : "🌿 Panícula"}
+        </span>
+      </td>
+      <td className="py-2.5 px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden max-w-20">
+            <div
+              className={clsx("h-full rounded-full", isLodging ? "bg-red-400" : "bg-green-500")}
+              style={{ width: `${det.confidence * 100}%` }}
+            />
+          </div>
+          <span className="text-xs font-mono font-bold text-stone-600">{(det.confidence * 100).toFixed(1)}%</span>
+        </div>
+      </td>
+      <td className="py-2.5 px-4 font-mono text-xs text-stone-400">
+        [{det.bbox.map(v => Math.round(v)).join(", ")}]
+      </td>
+    </tr>
+  );
+}
+
+/* ── Main component ──────────────────────────────────────────────── */
 export function SubsistemaCorte() {
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [result,   setResult]   = useState(null);
+  const [history,  setHistory]  = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
 
-  // Carga el historial al montar la vista
   useEffect(() => {
     getHistory("corte").then(setHistory).catch(console.error);
   }, []);
 
-  // Analiza una imagen seleccionada por el usuario
   async function handleFileSelected(file) {
     setIsLoading(true);
-    // Crea URL local para mostrar la imagen en el canvas
-    const localUrl = URL.createObjectURL(file);
-    setImageUrl(localUrl);
-
+    setImageUrl(URL.createObjectURL(file));
     try {
-      const inferenceResult = await analyzeImage("corte", file);
-      setResult(inferenceResult);
-      // Actualiza el historial con el nuevo resultado
-      setHistory((prev) => [
-        ...prev.slice(-29),
-        {
-          id: prev.length + 1,
-          subsystem: "corte",
-          timestamp: inferenceResult.frame_id,
-          latency_ms: inferenceResult.latency_ms,
-          panicle_count: inferenceResult.indicators.panicle_count,
-          lodging_detected: inferenceResult.indicators.lodging_detected,
-          alert_count: inferenceResult.alerts.length,
-        },
-      ]);
+      const data = await analyzeImage("corte", file);
+      setResult(data);
+      setHistory(prev => [...prev.slice(-29), {
+        id: Date.now(),
+        subsystem: "corte",
+        timestamp: data.frame_id,
+        latency_ms: data.latency_ms,
+        panicle_count: data.indicators.panicle_count,
+        lodging_detected: data.indicators.lodging_detected,
+        alert_count: data.alerts.length,
+      }]);
     } catch (err) {
-      console.error("Error en análisis S1:", err);
+      console.error("Error análisis S1:", err);
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Extrae indicadores del resultado actual
-  const indicators = result?.indicators;
+  const ind        = result?.indicators;
   const detections = result?.detections || [];
-  const alerts = result?.alerts || [];
+  const alerts     = result?.alerts || [];
 
-  // Determina el nivel de alerta general del subsistema
-  const overallStatus = alerts.some((a) => a.level === "CRITICO")
+  const overallStatus = alerts.some(a => a.level === "CRITICO")
     ? "CRITICO"
-    : alerts.some((a) => a.level === "ATENCION")
-      ? "ATENCION"
-      : result
-        ? "NORMAL"
-        : null;
+    : alerts.some(a => a.level === "ATENCION")
+    ? "ATENCION"
+    : result ? "NORMAL" : null;
+
+  const lodgingLevel = !ind ? null : ind.lodging_detected ? "CRITICO" : "NORMAL";
 
   return (
-    <div className="space-y-6">
-      {/* ── ALERTAS ACTIVAS ───────────────────────────────────── */}
+    <div className="space-y-5 max-w-screen-xl mx-auto w-full">
+
+      {/* ── Alert strip ─────────────────────────────────────── */}
       {alerts.length > 0 && (
         <div className="space-y-2">
-          {alerts.map((a) => (
-            <AlertBanner key={a.id} alert={a} />
-          ))}
+          {alerts.map(a => <AlertBanner key={a.id} alert={a} />)}
         </div>
       )}
 
-      {/* ── FILA PRINCIPAL: IMAGEN + INDICADORES ─────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Columna izquierda (3/5): Imagen analizada + carga */}
-        <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">Imagen Analizada</h3>
-              {overallStatus && <StatusBadge level={overallStatus} />}
-            </div>
-            {/* Canvas muestra la imagen con bounding boxes superpuestos */}
-            <ImageCanvas
-              imageUrl={imageUrl}
-              detections={detections}
-              imageWidth={640}
-              imageHeight={640}
-            />
-          </div>
+      {/* ── Main two-column layout ───────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-          {/* Componente de carga de archivos */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Cargar Imagen o Video
-            </h3>
-            <FileUpload
-              onFileSelected={handleFileSelected}
-              accept="both"
-              isLoading={isLoading}
-            />
-          </div>
+        {/* Left col (3/5): image + upload */}
+        <div className="lg:col-span-3 space-y-4">
+          <Panel
+            title="Frame Analizado — Cabezal de Corte"
+            badge="S1" badgeColor="bg-green-600"
+            icon={Activity}
+            action={overallStatus && <StatusBadge level={overallStatus} />}
+          >
+            <ImageCanvas imageUrl={imageUrl} detections={detections} imageWidth={640} imageHeight={640} />
+          </Panel>
+
+          <Panel title="Cargar Imagen o Video" icon={Cpu}>
+            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+            <p className="text-xs text-stone-400 mt-3 text-center">
+              JPG, PNG, MP4, WebM · El modelo detectará panículas y zonas de acame
+            </p>
+          </Panel>
         </div>
 
-        {/* Columna derecha (2/5): Indicadores operativos */}
+        {/* Right col (2/5): indicators */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Indicadores numéricos */}
+
+          {/* Critical: lodging */}
+          <CriticalMetric
+            label="Cultivo Acamado"
+            value={!ind ? "—" : ind.lodging_detected ? "DETECTADO" : "No detectado"}
+            level={lodgingLevel}
+            note="Cualquier detección de acame es estado CRÍTICO"
+            action={ind?.lodging_detected ? "Ajustar altura del reel inmediatamente" : undefined}
+          />
+
+          {/* Metric cards */}
           <div className="grid grid-cols-1 gap-3">
             <MetricCard
               title="Panículas Detectadas"
-              value={indicators?.panicle_count ?? "—"}
-              icon={<Wheat size={20} />}
-              color={
-                indicators?.panicle_density === "MUY_ALTA" ||
-                indicators?.panicle_density === "ALTA"
-                  ? "yellow"
-                  : "green"
-              }
-              subtitle={
-                indicators
-                  ? `Densidad: ${indicators.panicle_density}`
-                  : "Carga un frame para analizar"
-              }
-            />
-            <MetricCard
-              title="Cultivo Acamado"
-              value={
-                indicators
-                  ? indicators.lodging_detected
-                    ? "⚠️ DETECTADO"
-                    : "✓ No detectado"
-                  : "—"
-              }
-              icon={<MapPin size={20} />}
-              color={indicators?.lodging_detected ? "red" : "green"}
-              subtitle={
-                indicators?.lodging_zone
-                  ? `Zona: ${indicators.lodging_zone}`
-                  : undefined
-              }
+              value={ind?.panicle_count ?? "—"}
+              icon={<Wheat size={16} />}
+              color={ind?.panicle_density === "MUY_ALTA" ? "yellow" : "green"}
+              subtitle={ind ? `Densidad: ${ind.panicle_density}` : "Carga un frame para analizar"}
             />
             <MetricCard
               title="Latencia de Inferencia"
               value={result ? result.latency_ms.toFixed(1) : "—"}
               unit="ms"
+              icon={<Cpu size={16} />}
               color="blue"
-              subtitle="Tiempo de procesamiento del modelo IA"
+              subtitle="Procesamiento del modelo IA"
+            />
+            <MetricCard
+              title="Detecciones en Frame"
+              value={detections.length || "—"}
+              icon={<MapPin size={16} />}
+              color="gray"
+              subtitle={`${detections.filter(d => d.class === "cultivo_acamado").length} zonas de acame`}
             />
           </div>
 
-          {/* Mapa de densidad 4x4 */}
-          {indicators?.density_grid && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="font-semibold text-gray-900 mb-1">
-                Mapa de Densidad por Región
-              </h3>
-              <p className="text-xs text-gray-500 mb-3">
-                Número de panículas detectadas por zona de la imagen
-              </p>
-              <DensityGrid grid={indicators.density_grid} />
-            </div>
-          )}
-
-          {/* Recomendación operativa */}
-          {indicators?.recommended_action && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
-                Recomendación Operativa
-              </p>
-              <p className="text-sm text-blue-800">
-                {indicators.recommended_action}
-              </p>
+          {/* Recommended action */}
+          {ind?.recommended_action && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Activity className="w-3 h-3 text-white" />
+                </div>
+                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">Recomendación Operativa</p>
+              </div>
+              <p className="text-sm text-blue-800 leading-relaxed">{ind.recommended_action}</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── GRÁFICAS DE TENDENCIA ─────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              Tendencia Histórica — S1
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Últimos 30 frames analizados
-            </p>
-          </div>
-          <button
-            onClick={() => exportDiagnosticCSV("corte")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 border border-gray-200 hover:border-blue-300 rounded-lg px-3 py-1.5 transition-colors"
-          >
-            <Download size={16} />
-            Exportar CSV
-          </button>
-        </div>
-        <TrendChart
-          data={history}
-          dataKey="panicle_count"
-          label="Panículas detectadas"
-          color="#3b82f6"
-          unit=" pan."
-          xKey="timestamp"
-        />
+      {/* ── Density grid + Trend ─────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Panel title="Mapa de Densidad Espacial" badge="S1" badgeColor="bg-green-600" icon={Grid3x3}>
+          {ind?.density_grid ? (
+            <DensityGrid grid={ind.density_grid} />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-stone-400 gap-2">
+              <Grid3x3 className="w-8 h-8 opacity-30" />
+              <p className="text-sm">Carga un frame para ver la distribución espacial</p>
+            </div>
+          )}
+        </Panel>
+
+        <Panel
+          title="Tendencia — Panículas Detectadas"
+          icon={TrendingUp}
+          action={
+            <button
+              onClick={() => exportDiagnosticCSV("corte")}
+              className="flex items-center gap-1.5 text-xs text-stone-500 hover:text-green-600 border border-stone-200 hover:border-green-300 px-2.5 py-1.5 rounded-lg transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
+              CSV
+            </button>
+          }
+        >
+          <TrendChart
+            data={history}
+            dataKey="panicle_count"
+            label="Panículas detectadas"
+            color="#16a34a"
+            unit=" pan."
+            xKey="timestamp"
+            filled
+          />
+        </Panel>
       </div>
 
-      {/* ── TABLA DE ÚLTIMAS DETECCIONES ─────────────────────── */}
+      {/* ── Detections table ────────────────────────────────── */}
       {detections.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Detecciones del Frame Actual ({detections.length})
-          </h3>
+        <Panel title={`Detecciones del Frame Actual (${detections.length})`} icon={MapPin}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-2 px-3 text-xs text-gray-500 uppercase">
-                    Clase
-                  </th>
-                  <th className="text-left py-2 px-3 text-xs text-gray-500 uppercase">
-                    Confianza
-                  </th>
-                  <th className="text-left py-2 px-3 text-xs text-gray-500 uppercase">
-                    Bounding Box
-                  </th>
+                <tr className="border-b border-stone-100">
+                  {["Clase", "Confianza", "Bounding Box"].map(h => (
+                    <th key={h} className="text-left py-2 px-4 text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {detections.map((det) => (
-                  <tr
-                    key={det.id}
-                    className="border-b border-gray-50 hover:bg-gray-50"
-                  >
-                    <td className="py-2 px-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          det.class === "cultivo_acamado"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {det.class}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 font-mono">
-                      {(det.confidence * 100).toFixed(1)}%
-                    </td>
-                    <td className="py-2 px-3 font-mono text-gray-500 text-xs">
-                      [{det.bbox.join(", ")}]
-                    </td>
-                  </tr>
-                ))}
+                {detections.map(det => <DetectionRow key={det.id} det={det} />)}
               </tbody>
             </table>
           </div>
-        </div>
+        </Panel>
       )}
     </div>
   );
