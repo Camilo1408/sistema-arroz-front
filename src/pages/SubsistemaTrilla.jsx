@@ -251,7 +251,7 @@ export function SubsistemaTrilla() {
           </Panel>
 
           <Panel title="Cargar Frame de Trilla" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
           </Panel>
         </div>
 

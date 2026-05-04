@@ -36,10 +36,26 @@ const NAV_LINKS = [
 ];
 
 const STATS = [
-  { value: "94%", label: "Precisión de detección", color: "text-green-600" },
-  { value: "↓38%", label: "Reducción de pérdidas", color: "text-amber-600" },
-  { value: "3×", label: "Mayor eficiencia operativa", color: "text-blue-600" },
-  { value: "<15ms", label: "Latencia de inferencia", color: "text-green-600" },
+  {
+    value: "3",
+    label: "Subsistemas de cosecha monitoreados",
+    color: "text-green-600",
+  },
+  {
+    value: "2",
+    label: "Modelos de visión computacional",
+    color: "text-amber-600",
+  },
+  {
+    value: "3 niveles",
+    label: "Sistema de alertas operativas",
+    color: "text-blue-600",
+  },
+  {
+    value: "CSV",
+    label: "Exportación de diagnósticos de campo",
+    color: "text-green-600",
+  },
 ];
 
 const HOW_IT_WORKS = [
@@ -54,7 +70,7 @@ const HOW_IT_WORKS = [
     step: "02",
     icon: Cpu,
     title: "Inferencia IA",
-    desc: "Modelos de visión computacional (detección de objetos + segmentación semántica) procesan cada fotograma con latencia sub-20ms.",
+    desc: "Modelos de visión computacional (YOLOv11s para detección y U-Net para segmentación semántica) procesan cada imagen capturada por el operador.",
     color: "bg-blue-500",
   },
   {
@@ -131,8 +147,8 @@ const TECH_FEATURES = [
   },
   {
     icon: Activity,
-    title: "Monitoreo en Tiempo Real",
-    desc: "WebSocket para streaming de fotogramas con inferencia a menos de 20ms por frame.",
+    title: "Análisis por Imagen",
+    desc: "Carga imágenes de cada zona de la cosechadora y obtén resultados de inferencia de forma inmediata con retroalimentación operativa.",
   },
   {
     icon: BarChart3,
@@ -188,7 +204,7 @@ const BADGES = [
   {
     icon: Award,
     label: "Agricultura de Precisión",
-    sub: "ISO 11783 Compatible",
+    sub: "Proyecto de Investigación USCO",
   },
   { icon: Leaf, label: "Smart Farming", sub: "Tecnología sustentable" },
   { icon: ShieldCheck, label: "Datos Seguros", sub: "Procesamiento local" },
@@ -255,7 +271,7 @@ function FieldVisual() {
           {[
             { label: "Panículas", val: "324", col: "text-green-600" },
             { label: "Acamado", val: "0", col: "text-green-600" },
-            { label: "Latencia", val: "12ms", col: "text-blue-600" },
+            { label: "Alertas", val: "0", col: "text-green-600" },
           ].map((m) => (
             <div key={m.label} className="text-center">
               <div className={`text-base font-bold font-mono ${m.col}`}>
@@ -461,13 +477,13 @@ export default function LandingPage() {
             <h1 className="fade-up-2 font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-green-600 leading-tight tracking-tight">
               Cosecha de Arroz
               <br />
-              <span className="text-green-900">Más Inteligente.</span>
+              <span className="text-green-800">Más Inteligente.</span>
             </h1>
 
             <p className="fade-up-3 text-green-600 text-lg leading-relaxed max-w-lg">
               Sistema de visión computacional que monitorea los tres subsistemas
               críticos de la cosechadora —{" "}
-              <strong className="text-green-900">
+              <strong className="text-green-800">
                 Corte, Trilla y Limpieza
               </strong>{" "}
               — detectando pérdidas y anomalías en tiempo real para maximizar el
@@ -484,7 +500,7 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#sistema"
-                className="inline-flex items-center gap-2 border border-green-500 text-green-700 hover:text-green-400 hover:border-green-400 font-medium px-6 py-3 rounded-xl transition-all"
+                className="inline-flex items-center gap-2 border border-green-800 text-green-700 hover:text-green-400 hover:border-green-500 font-medium px-6 py-3 rounded-xl transition-all"
               >
                 Conocer el Sistema
                 <ChevronRight className="w-4 h-4" />
@@ -495,14 +511,14 @@ export default function LandingPage() {
             <div className="fade-up-5 flex flex-wrap gap-6 pt-2">
               {[
                 { v: "3 Subsistemas", l: "monitoreados" },
-                { v: "<20ms", l: "latencia IA" },
-                { v: "94%", l: "precisión" },
+                { v: "YOLOv11s", l: "detección S1 y S3" },
+                { v: "U-Net", l: "segmentación S2" },
               ].map((s) => (
                 <div key={s.l}>
-                  <div className="text-green-800 font-bold text-xl font-mono">
+                  <div className="text-green-600 font-bold text-xl font-mono">
                     {s.v}
                   </div>
-                  <div className="text-green-400 text-xs font-medium">
+                  <div className="text-green-800 text-xs font-medium">
                     {s.l}
                   </div>
                 </div>
@@ -562,7 +578,7 @@ export default function LandingPage() {
             </div>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900">
               Del campo al <span className="gradient-text">diagnóstico</span> en
-              milisegundos
+              segundos
             </h2>
             <p className="text-stone-500 mt-3 max-w-xl mx-auto">
               Un pipeline de tres etapas que convierte imágenes de cámara en
@@ -742,7 +758,7 @@ export default function LandingPage() {
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white">
               Agricultura más <span className="text-green-400">sostenible</span>
             </h2>
-            <p className="text-green-100/70 mt-3 max-w-xl mx-auto">
+            <p className="text-green-200 mt-3 max-w-xl mx-auto">
               Optimizar la cosecha no solo aumenta el rendimiento — reduce el
               impacto ambiental por tonelada producida.
             </p>
@@ -754,16 +770,16 @@ export default function LandingPage() {
                 key={i}
                 className="glass rounded-2xl p-5 text-center card-hover"
               >
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mx-auto mb-3 border border-green-400/20">
-                  <s.icon className="w-6 h-6 text-green-300" />
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-3 border border-green-400/20">
+                  <s.icon className="w-6 h-6 text-green-800" />
                 </div>
-                <div className="text-3xl font-bold font-mono text-white mb-1">
+                <div className="text-3xl font-bold font-mono text-green-800 mb-1">
                   {s.value}
                 </div>
-                <div className="text-green-200 font-semibold text-sm mb-1">
+                <div className="text-green-900 font-semibold text-sm mb-1">
                   {s.title}
                 </div>
-                <p className="text-green-100/60 text-xs leading-relaxed">
+                <p className="text-green-700 text-xs leading-relaxed">
                   {s.desc}
                 </p>
               </div>

@@ -183,7 +183,7 @@ export function SubsistemaLimpieza() {
           </Panel>
 
           <Panel title="Cargar Frame del Sistema de Limpieza" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
             <p className="text-xs text-stone-400 mt-3 text-center">
               El modelo detectará grano íntegro, roto y material no-grano en la salida
             </p>

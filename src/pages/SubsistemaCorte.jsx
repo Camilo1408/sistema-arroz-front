@@ -212,10 +212,10 @@ export function SubsistemaCorte() {
             <ImageCanvas imageUrl={imageUrl} detections={detections} imageWidth={640} imageHeight={640} />
           </Panel>
 
-          <Panel title="Cargar Imagen o Video" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} accept="both" isLoading={isLoading} />
+          <Panel title="Cargar Imagen del Cabezal de Corte" icon={Cpu}>
+            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
             <p className="text-xs text-stone-400 mt-3 text-center">
-              JPG, PNG, MP4, WebM · El modelo detectará panículas y zonas de acame
+              JPG, PNG · El modelo detectará panículas y zonas de acame
             </p>
           </Panel>
         </div>

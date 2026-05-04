@@ -146,8 +146,8 @@ export function ImageCanvas({
           <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-3">
             <span className="text-2xl">🌾</span>
           </div>
-          <p className="text-sm">Carga una imagen o video para analizar</p>
-          <p className="text-xs text-gray-600 mt-1">Formatos: JPG, PNG, MP4</p>
+          <p className="text-sm">Carga una imagen para analizar</p>
+          <p className="text-xs text-gray-600 mt-1">Formatos: JPG, PNG</p>
         </div>
       )}
     </div>
