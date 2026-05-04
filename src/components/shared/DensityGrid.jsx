@@ -1,21 +1,36 @@
-import clsx from "clsx";
-
-const CELL_LEVELS = [
-  { label: "Baja",   bg: "bg-green-100",  text: "text-green-800",  border: "border-green-200" },
-  { label: "Media",  bg: "bg-amber-100",  text: "text-amber-800",  border: "border-amber-200" },
-  { label: "Alta",   bg: "bg-orange-100", text: "text-orange-800", border: "border-orange-200" },
-  { label: "Máxima", bg: "bg-red-100",    text: "text-red-800",    border: "border-red-200", bold: true },
-];
-
-function getLevel(value, max) {
-  const ratio = max > 0 ? value / max : 0;
-  if (ratio < 0.25) return 0;
-  if (ratio < 0.50) return 1;
-  if (ratio < 0.75) return 2;
-  return 3;
+// Maps a ratio [0,1] to a green→amber→red RGBA color with increasing opacity
+function heatColor(ratio) {
+  const r = Math.round(
+    ratio < 0.5
+      ? 34 + ratio * 2 * (251 - 34)
+      : 251 + (ratio - 0.5) * 2 * (239 - 251)
+  );
+  const g = Math.round(
+    ratio < 0.5
+      ? 197 - ratio * 2 * (197 - 146)
+      : 146 - (ratio - 0.5) * 2 * (146 - 68)
+  );
+  const b = Math.round(ratio < 0.5 ? 94 - ratio * 2 * 94 : 0);
+  const a = 0.12 + ratio * 0.68;
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function DensityGrid({ grid }) {
+function heatTextClass(ratio) {
+  if (ratio < 0.25) return "text-green-800";
+  if (ratio < 0.5)  return "text-amber-800";
+  if (ratio < 0.75) return "text-orange-900";
+  return "text-red-900 font-bold";
+}
+
+const LEGEND = [
+  { label: "Sin det.", ratio: 0 },
+  { label: "Baja",     ratio: 0.2 },
+  { label: "Media",    ratio: 0.5 },
+  { label: "Alta",     ratio: 0.8 },
+  { label: "Máxima",   ratio: 1.0 },
+];
+
+export function DensityGrid({ grid, totalDetections }) {
   if (!grid || grid.length === 0) {
     return (
       <div className="text-stone-400 text-sm text-center py-6 bg-stone-50 rounded-xl border border-dashed border-stone-200">
@@ -24,58 +39,93 @@ export function DensityGrid({ grid }) {
     );
   }
 
-  const maxVal = Math.max(...grid.flat(), 1);
+  const rows = grid.length;
+  const cols = grid[0]?.length ?? 0;
+  const flat = grid.flat();
+  const maxVal = Math.max(...flat, 1);
+  const colLabels = Array.from({ length: cols }, (_, i) => `C${i + 1}`);
+  const rowLabels = Array.from({ length: rows }, (_, i) => `F${i + 1}`);
+  const colSums   = Array.from({ length: cols }, (_, ci) =>
+    grid.reduce((s, row) => s + (row[ci] ?? 0), 0)
+  );
+
+  const gridCols = `1.5rem repeat(${cols}, 1fr)`;
 
   return (
-    <div className="space-y-3">
-      {/* Labels: columns */}
-      <div className="grid grid-cols-4 gap-1 ml-6">
-        {["C1", "C2", "C3", "C4"].map(c => (
+    <div className="space-y-2">
+      {/* Column header labels */}
+      <div className="grid gap-1" style={{ gridTemplateColumns: gridCols }}>
+        <div />
+        {colLabels.map(c => (
           <div key={c} className="text-[10px] font-mono text-stone-400 text-center">{c}</div>
         ))}
       </div>
 
-      <div className="flex gap-1">
-        {/* Row labels */}
-        <div className="flex flex-col gap-1 justify-around">
-          {["F1", "F2", "F3", "F4"].map(r => (
-            <div key={r} className="text-[10px] font-mono text-stone-400 w-5 text-center leading-none" style={{ height: "2.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {r}
-            </div>
-          ))}
+      {/* Heatmap rows */}
+      {grid.map((row, ri) => (
+        <div key={ri} className="grid gap-1 items-stretch" style={{ gridTemplateColumns: gridCols }}>
+          <div className="text-[10px] font-mono text-stone-400 flex items-center justify-center">
+            {rowLabels[ri]}
+          </div>
+          {row.map((count, ci) => {
+            const ratio = count / maxVal;
+            return (
+              <div
+                key={ci}
+                className={`h-10 rounded-lg flex items-center justify-center text-xs font-mono border border-black/[0.06] transition-transform hover:scale-105 cursor-default select-none ${heatTextClass(ratio)}`}
+                style={{ backgroundColor: heatColor(ratio) }}
+                title={`Región (${rowLabels[ri]}, ${colLabels[ci]}): ${count} detección${count !== 1 ? "es" : ""}`}
+              >
+                {count}
+              </div>
+            );
+          })}
         </div>
+      ))}
 
-        {/* Grid */}
-        <div className="grid grid-cols-4 gap-1 flex-1">
-          {grid.map((row, ri) =>
-            row.map((count, ci) => {
-              const lvl = CELL_LEVELS[getLevel(count, maxVal)];
-              return (
-                <div
-                  key={`${ri}-${ci}`}
-                  className={clsx(
-                    "h-10 rounded-lg flex items-center justify-center text-xs font-mono border transition-all hover:scale-105 cursor-default",
-                    lvl.bg, lvl.text, lvl.border,
-                    lvl.bold && "font-bold"
-                  )}
-                  title={`Región (F${ri+1}, C${ci+1}): ${count} panículas`}
-                >
-                  {count}
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2 pt-1">
-        {CELL_LEVELS.map(l => (
-          <div key={l.label} className={clsx("flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-lg border", l.bg, l.text, l.border)}>
-            <span className={clsx("w-2 h-2 rounded-sm", l.bg.replace("100", "400") )} />
-            {l.label}
+      {/* Column totals */}
+      <div className="grid gap-1" style={{ gridTemplateColumns: gridCols }}>
+        <div className="text-[9px] font-mono text-stone-300 flex items-end justify-center pb-0.5">Σ</div>
+        {colSums.map((s, i) => (
+          <div
+            key={i}
+            className="text-[10px] font-mono text-stone-500 text-center font-semibold border-t border-stone-100 pt-1"
+          >
+            {s}
           </div>
         ))}
+      </div>
+
+      {/* Summary line */}
+      <div className="flex items-center justify-between pt-0.5 text-[11px] text-stone-500 border-t border-stone-100">
+        <span>
+          {totalDetections !== undefined
+            ? <><span className="font-bold text-stone-700">{totalDetections}</span> detecciones en {rows}×{cols} zonas</>
+            : <>{rows}×{cols} zonas</>
+          }
+        </span>
+        <span className="font-mono text-[10px] text-stone-400">pico: {maxVal}/zona</span>
+      </div>
+
+      {/* Continuous color scale legend */}
+      <div className="flex items-center gap-0.5 h-3 rounded-full overflow-hidden border border-stone-100">
+        {Array.from({ length: 40 }, (_, i) => {
+          const r = i / 39;
+          return (
+            <div
+              key={i}
+              className="flex-1 h-full"
+              style={{ backgroundColor: heatColor(r) }}
+            />
+          );
+        })}
+      </div>
+      <div className="flex justify-between text-[9px] font-mono text-stone-400 -mt-0.5">
+        <span>0</span>
+        {LEGEND.slice(1, -1).map(l => (
+          <span key={l.label}>{l.label}</span>
+        ))}
+        <span>{maxVal}</span>
       </div>
     </div>
   );

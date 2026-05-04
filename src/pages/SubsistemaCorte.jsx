@@ -10,6 +10,20 @@ import { StatusBadge }  from "@/components/shared/StatusBadge.jsx";
 import { analyzeImage, getHistory, exportDiagnosticCSV } from "@/services/api.ts";
 import clsx from "clsx";
 
+/* ── Density grid computation ────────────────────────────────────── */
+function computeDensityGrid(detections, rows = 4, cols = 4, imgW = 640, imgH = 640) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+  for (const det of detections) {
+    const [x1, y1, x2, y2] = det.bbox;
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const col = Math.min(Math.floor((cx / imgW) * cols), cols - 1);
+    const row = Math.min(Math.floor((cy / imgH) * rows), rows - 1);
+    if (row >= 0 && col >= 0) grid[row][col]++;
+  }
+  return grid;
+}
+
 /* ── Shared panel wrapper ────────────────────────────────────────── */
 function Panel({ title, icon: Icon, badge, badgeColor, action, children, className }) {
   return (
@@ -99,6 +113,7 @@ export function SubsistemaCorte() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [error,    setError]    = useState(null);
+  const [imgDims,  setImgDims]  = useState({ w: 640, h: 640 });
 
   useEffect(() => {
     getHistory("corte").then(setHistory).catch(console.error);
@@ -116,7 +131,12 @@ export function SubsistemaCorte() {
     setIsLoading(true);
     setError(null);
     setResult(null);
-    setImageUrl(URL.createObjectURL(file));
+    const objectUrl = URL.createObjectURL(file);
+    setImageUrl(objectUrl);
+    // Read image natural dimensions so the density grid coordinates are correct
+    const imgEl = new window.Image();
+    imgEl.onload = () => setImgDims({ w: imgEl.naturalWidth, h: imgEl.naturalHeight });
+    imgEl.src = objectUrl;
     try {
       const data = await analyzeImage("corte", file);
       setResult(data);
@@ -140,6 +160,9 @@ export function SubsistemaCorte() {
   const ind        = result?.indicators;
   const detections = result?.detections || [];
   const alerts     = result?.alerts || [];
+  const densityGrid = detections.length > 0
+    ? computeDensityGrid(detections, 4, 4, imgDims.w, imgDims.h)
+    : null;
 
   const overallStatus = alerts.some(a => a.level === "CRITICO")
     ? "CRITICO"
@@ -253,12 +276,19 @@ export function SubsistemaCorte() {
       {/* ── Density grid + Trend ─────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Panel title="Mapa de Densidad Espacial" badge="S1" badgeColor="bg-green-600" icon={Grid3x3}>
-          {ind?.density_grid ? (
-            <DensityGrid grid={ind.density_grid} />
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-3 text-stone-400">
+              <div className="w-7 h-7 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+              <p className="text-sm">Calculando distribución espacial…</p>
+            </div>
+          ) : densityGrid ? (
+            <DensityGrid grid={densityGrid} totalDetections={detections.length} />
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-stone-400 gap-2">
               <Grid3x3 className="w-8 h-8 opacity-30" />
-              <p className="text-sm">Carga un frame para ver la distribución espacial</p>
+              <p className="text-sm">
+                {result ? "Sin detecciones en este frame" : "Carga un frame para ver la distribución espacial"}
+              </p>
             </div>
           )}
         </Panel>
