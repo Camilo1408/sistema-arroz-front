@@ -23,7 +23,8 @@ const fakeDelay = (ms = 800) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ─── FUNCIÓN AUXILIAR PARA PETICIONES HTTP ──────────────────
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const url = `${BASE_URL}${endpoint}`;
+  const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -32,7 +33,14 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   });
 
   if (!response.ok) {
-    throw new Error(`Error HTTP ${response.status}: ${await response.text()}`);
+    const rawBody = await response.text();
+    let detail = rawBody;
+    try {
+      const parsed = JSON.parse(rawBody);
+      detail = parsed.detail ?? rawBody;
+    } catch { /* body is not JSON */ }
+    console.error(`[API] ${options?.method ?? 'GET'} ${url} → ${response.status}`, detail);
+    throw new Error(`Error HTTP ${response.status}: ${detail}`);
   }
 
   return response.json() as Promise<T>;

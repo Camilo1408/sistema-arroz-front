@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://camilo1408-sistema-arroz-api.hf.space/openapi.json\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(f'{m} {p}'\\) for p,v in d['paths'].items\\(\\) for m in v]\")",
+      "Bash(curl -s \"https://camilo1408-sistema-arroz-api.hf.space/docs\" -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s \"https://camilo1408-sistema-arroz-api.hf.space/api/v1/status\" -w \"\\\\nHTTP_STATUS:%{http_code}\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(curl *)",
+      "Read(//c/Users/cesic/Documents/8vo Semestre/Vision Artificial/web-sistema-arroz//**)",
+      "Read(//c/Users/cesic/Documents/8vo Semestre/Vision Artificial//**)"
+    ]
+  }
+}

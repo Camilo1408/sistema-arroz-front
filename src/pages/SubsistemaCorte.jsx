@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Download, Wheat, MapPin, Cpu, Activity, TrendingUp, Grid3x3 } from "lucide-react";
+import { Download, Wheat, MapPin, Cpu, Activity, TrendingUp, Grid3x3, XCircle } from "lucide-react";
 import { MetricCard }   from "@/components/shared/MetricCard.jsx";
 import { AlertBanner }  from "@/components/shared/AlertBanner.jsx";
 import { ImageCanvas }  from "@/components/shared/ImageCanvas.jsx";
@@ -98,13 +98,24 @@ export function SubsistemaCorte() {
   const [history,  setHistory]  = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [error,    setError]    = useState(null);
 
   useEffect(() => {
     getHistory("corte").then(setHistory).catch(console.error);
   }, []);
 
   async function handleFileSelected(file) {
+    if (!file.type.startsWith("image/")) {
+      setError("El archivo seleccionado no es una imagen válida.");
+      return;
+    }
+    if (file.size === 0) {
+      setError("El archivo de imagen está vacío.");
+      return;
+    }
     setIsLoading(true);
+    setError(null);
+    setResult(null);
     setImageUrl(URL.createObjectURL(file));
     try {
       const data = await analyzeImage("corte", file);
@@ -120,6 +131,7 @@ export function SubsistemaCorte() {
       }]);
     } catch (err) {
       console.error("Error análisis S1:", err);
+      setError(err instanceof Error ? err.message : "Error desconocido al analizar la imagen");
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +151,22 @@ export function SubsistemaCorte() {
 
   return (
     <div className="space-y-5 max-w-screen-xl mx-auto w-full">
+
+      {error && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+          <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-red-800 text-sm">Error en el análisis S1</p>
+            <p className="text-red-700 text-xs mt-0.5 font-mono break-all">{error}</p>
+            <p className="text-red-500 text-xs mt-1">
+              Verifica que la imagen sea válida y que el servicio de inferencia esté disponible.
+            </p>
+          </div>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 flex-shrink-0" aria-label="Cerrar">
+            <XCircle className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* ── Alert strip ─────────────────────────────────────── */}
       {alerts.length > 0 && (
