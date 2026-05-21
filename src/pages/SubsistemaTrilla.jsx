@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Download, AlertTriangle, Activity, TrendingUp, Cpu, Layers, XCircle } from "lucide-react";
+import { Download, AlertTriangle, Activity, TrendingUp, Cpu, Layers, XCircle, ImageIcon, Film } from "lucide-react";
 import { MetricCard }    from "@/components/shared/MetricCard.jsx";
 import { AlertBanner }   from "@/components/shared/AlertBanner.jsx";
 import { CompositionBar } from "@/components/shared/CompositionBar.jsx";
 import { TrendChart }    from "@/components/shared/TrendChart.jsx";
 import { FileUpload }    from "@/components/shared/FileUpload.jsx";
+import { VideoUpload }  from "@/components/shared/VideoUpload.jsx";
 import { StatusBadge }   from "@/components/shared/StatusBadge.jsx";
 import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV, getOperationalThresholds } from "@/services/api.ts";
 import clsx from "clsx";
@@ -97,6 +98,7 @@ export function SubsistemaTrilla() {
   const [showSegmentation, setShowSegmentation] = useState(false);
   const [imageUrl,        setImageUrl]        = useState(null);
   const [error,           setError]           = useState(null);
+  const [inputMode,       setInputMode]       = useState("imagen");
   const [thresholds,      setThresholds]      = useState({
     warning:  DEFAULT_BROKEN_WARNING,
     critical: DEFAULT_BROKEN_CRITICAL,
@@ -260,8 +262,43 @@ export function SubsistemaTrilla() {
             )}
           </Panel>
 
-          <Panel title="Cargar Frame de Trilla" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
+          <Panel
+            title={inputMode === "imagen" ? "Cargar Frame de Trilla" : "Analizar Video de Trilla"}
+            icon={Cpu}
+            action={
+              <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setInputMode("imagen")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "imagen"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <ImageIcon className="w-3 h-3" /> Imagen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("video")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "video"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <Film className="w-3 h-3" /> Video
+                </button>
+              </div>
+            }
+          >
+            {inputMode === "imagen" ? (
+              <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
+            ) : (
+              <VideoUpload onFrameReady={handleFileSelected} isProcessing={isLoading} />
+            )}
           </Panel>
         </div>
 

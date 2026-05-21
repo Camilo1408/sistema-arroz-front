@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Download, Wheat, MapPin, Cpu, Activity, TrendingUp, Grid3x3, XCircle } from "lucide-react";
+import { Download, Wheat, MapPin, Cpu, Activity, TrendingUp, Grid3x3, XCircle, ImageIcon, Film } from "lucide-react";
 import { MetricCard }   from "@/components/shared/MetricCard.jsx";
 import { AlertBanner }  from "@/components/shared/AlertBanner.jsx";
 import { ImageCanvas }  from "@/components/shared/ImageCanvas.jsx";
 import { DensityGrid }  from "@/components/shared/DensityGrid.jsx";
 import { TrendChart }   from "@/components/shared/TrendChart.jsx";
 import { FileUpload }   from "@/components/shared/FileUpload.jsx";
+import { VideoUpload }  from "@/components/shared/VideoUpload.jsx";
 import { StatusBadge }  from "@/components/shared/StatusBadge.jsx";
 import { analyzeImage, getHistory, exportDiagnosticCSV } from "@/services/api.ts";
 import clsx from "clsx";
@@ -108,12 +109,13 @@ function DetectionRow({ det }) {
 
 /* ── Main component ──────────────────────────────────────────────── */
 export function SubsistemaCorte() {
-  const [result,   setResult]   = useState(null);
-  const [history,  setHistory]  = useState([]);
+  const [result,    setResult]    = useState(null);
+  const [history,   setHistory]   = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [error,    setError]    = useState(null);
-  const [imgDims,  setImgDims]  = useState({ w: 640, h: 640 });
+  const [imageUrl,  setImageUrl]  = useState(null);
+  const [error,     setError]     = useState(null);
+  const [imgDims,   setImgDims]   = useState({ w: 640, h: 640 });
+  const [inputMode, setInputMode] = useState("imagen"); // "imagen" | "video"
 
   useEffect(() => {
     getHistory("corte").then(setHistory).catch(console.error);
@@ -212,11 +214,53 @@ export function SubsistemaCorte() {
             <ImageCanvas imageUrl={imageUrl} detections={detections} imageWidth={640} imageHeight={640} />
           </Panel>
 
-          <Panel title="Cargar Imagen del Cabezal de Corte" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
-            <p className="text-xs text-stone-400 mt-3 text-center">
-              JPG, PNG · El modelo detectará panículas y zonas de acame
-            </p>
+          <Panel
+            title={inputMode === "imagen" ? "Cargar Imagen — Cabezal de Corte" : "Analizar Video — Cabezal de Corte"}
+            icon={Cpu}
+            action={
+              <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setInputMode("imagen")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "imagen"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <ImageIcon className="w-3 h-3" /> Imagen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("video")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "video"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <Film className="w-3 h-3" /> Video
+                </button>
+              </div>
+            }
+          >
+            {inputMode === "imagen" ? (
+              <>
+                <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
+                <p className="text-xs text-stone-400 mt-3 text-center">
+                  JPG, PNG · El modelo detectará panículas y zonas de acame
+                </p>
+              </>
+            ) : (
+              <>
+                <VideoUpload onFrameReady={handleFileSelected} isProcessing={isLoading} />
+                <p className="text-xs text-stone-400 mt-3 text-center">
+                  MP4, WebM, AVI · Cada frame se analiza con el modelo S1
+                </p>
+              </>
+            )}
           </Panel>
         </div>
 

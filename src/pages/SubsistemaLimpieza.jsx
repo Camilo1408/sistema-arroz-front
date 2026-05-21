@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Download, Wind, Activity, TrendingUp, Cpu, AlertTriangle, XCircle } from "lucide-react";
+import { Download, Wind, Activity, TrendingUp, Cpu, AlertTriangle, XCircle, ImageIcon, Film } from "lucide-react";
 import { MetricCard }    from "@/components/shared/MetricCard.jsx";
 import { AlertBanner }   from "@/components/shared/AlertBanner.jsx";
 import { ImageCanvas }   from "@/components/shared/ImageCanvas.jsx";
 import { CompositionBar } from "@/components/shared/CompositionBar.jsx";
 import { TrendChart }    from "@/components/shared/TrendChart.jsx";
 import { FileUpload }    from "@/components/shared/FileUpload.jsx";
+import { VideoUpload }  from "@/components/shared/VideoUpload.jsx";
 import { StatusBadge }   from "@/components/shared/StatusBadge.jsx";
 import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV } from "@/services/api.ts";
 import clsx from "clsx";
@@ -81,6 +82,7 @@ export function SubsistemaLimpieza() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl,  setImageUrl]  = useState(null);
   const [error,     setError]     = useState(null);
+  const [inputMode, setInputMode] = useState("imagen");
 
   useEffect(() => {
     getHistoryFromDB("limpieza", 30)
@@ -182,11 +184,48 @@ export function SubsistemaLimpieza() {
             <ImageCanvas imageUrl={imageUrl} detections={detections} imageWidth={640} imageHeight={640} />
           </Panel>
 
-          <Panel title="Cargar Frame del Sistema de Limpieza" icon={Cpu}>
-            <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
-            <p className="text-xs text-stone-400 mt-3 text-center">
-              El modelo detectará grano íntegro, roto y material no-grano en la salida
-            </p>
+          <Panel
+            title={inputMode === "imagen" ? "Cargar Frame — Sistema de Limpieza" : "Analizar Video — Sistema de Limpieza"}
+            icon={Cpu}
+            action={
+              <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setInputMode("imagen")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "imagen"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <ImageIcon className="w-3 h-3" /> Imagen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("video")}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all",
+                    inputMode === "video"
+                      ? "bg-white text-stone-700 shadow-sm"
+                      : "text-stone-400 hover:text-stone-600"
+                  )}
+                >
+                  <Film className="w-3 h-3" /> Video
+                </button>
+              </div>
+            }
+          >
+            {inputMode === "imagen" ? (
+              <>
+                <FileUpload onFileSelected={handleFileSelected} isLoading={isLoading} />
+                <p className="text-xs text-stone-400 mt-3 text-center">
+                  El modelo detectará grano íntegro, roto y material no-grano en la salida
+                </p>
+              </>
+            ) : (
+              <VideoUpload onFrameReady={handleFileSelected} isProcessing={isLoading} />
+            )}
           </Panel>
         </div>
 
