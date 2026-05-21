@@ -173,6 +173,33 @@ export async function getSubsystemStats(
   return fetchAPI(`/history/stats/${subsystem}`);
 }
 
+export interface OperationalThresholds {
+  s2_broken_warning: number;
+  s2_broken_critical: number;
+  s3_non_grain_warning: number;
+  s3_non_grain_critical: number;
+}
+
+/**
+ * Lee los umbrales operativos desde el backend (fuente única de verdad: config.py).
+ * Fallback: valores del documento [6] si el backend no está disponible.
+ */
+export async function getOperationalThresholds(): Promise<OperationalThresholds> {
+  const FALLBACK: OperationalThresholds = {
+    s2_broken_warning:    0.3,
+    s2_broken_critical:   0.5,  // Liu et al. [6]: rotura < 0.5 %
+    s3_non_grain_warning:  1.5,
+    s3_non_grain_critical: 2.0, // Liu et al. [13]: impurezas < 2 %
+  };
+  if (USE_MOCK) return FALLBACK;
+  try {
+    const health = await fetchAPI<{ thresholds?: OperationalThresholds }>('/health');
+    return health.thresholds ?? FALLBACK;
+  } catch {
+    return FALLBACK;
+  }
+}
+
 /**
  * Elimina un análisis específico del historial.
  */

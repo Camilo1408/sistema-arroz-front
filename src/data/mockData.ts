@@ -85,15 +85,9 @@ export const mockSystemStatus: SystemStatus = {
 
 const s1Indicators: S1Indicators = {
   panicle_count: 47,
-  panicle_density: 'ALTA',
+  density_level: 'alto',
   lodging_detected: true,
-  lodging_zone: 'noreste',
-  density_grid: [
-    [12, 18, 25, 14],
-    [19, 31, 29, 22],
-    [24, 27, 35, 20],
-    [16, 20, 23, 18],
-  ],
+  lodging_conf: 0.87,
   recommended_action: 'Reducir velocidad de avance. Cultivo acamado detectado.',
 };
 

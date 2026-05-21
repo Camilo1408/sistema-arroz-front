@@ -6,11 +6,12 @@ import { CompositionBar } from "@/components/shared/CompositionBar.jsx";
 import { TrendChart }    from "@/components/shared/TrendChart.jsx";
 import { FileUpload }    from "@/components/shared/FileUpload.jsx";
 import { StatusBadge }   from "@/components/shared/StatusBadge.jsx";
-import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV } from "@/services/api.ts";
+import { analyzeImage, getHistoryFromDB, exportDiagnosticCSV, getOperationalThresholds } from "@/services/api.ts";
 import clsx from "clsx";
 
-const BROKEN_WARNING  = 0.3;
-const BROKEN_CRITICAL = 0.5;
+// Valores de respaldo (fuente: documento §7.2.5, referencia [6] Liu et al.)
+const DEFAULT_BROKEN_WARNING  = 0.3;
+const DEFAULT_BROKEN_CRITICAL = 0.5;
 
 const SEG_COLORS = {
   intact: "#22c55e",
@@ -96,11 +97,20 @@ export function SubsistemaTrilla() {
   const [showSegmentation, setShowSegmentation] = useState(false);
   const [imageUrl,        setImageUrl]        = useState(null);
   const [error,           setError]           = useState(null);
+  const [thresholds,      setThresholds]      = useState({
+    warning:  DEFAULT_BROKEN_WARNING,
+    critical: DEFAULT_BROKEN_CRITICAL,
+  });
 
   useEffect(() => {
     getHistoryFromDB("trilla", 30)
       .then(res => setHistory(Array.isArray(res) ? res : res?.records || []))
       .catch(() => setHistory([]));
+
+    // Umbrales desde el backend (fuente única de verdad: config.py)
+    getOperationalThresholds()
+      .then(t => setThresholds({ warning: t.s2_broken_warning, critical: t.s2_broken_critical }))
+      .catch(() => { /* mantiene defaults del documento */ });
   }, []);
 
   async function handleFileSelected(file) {
@@ -142,8 +152,8 @@ export function SubsistemaTrilla() {
   const alerts = result?.alerts || [];
 
   const brokenLevel = !ind ? null
-    : ind.broken_grain_pct >= BROKEN_CRITICAL ? "CRITICO"
-    : ind.broken_grain_pct >= BROKEN_WARNING  ? "ATENCION"
+    : ind.broken_grain_pct >= thresholds.critical ? "CRITICO"
+    : ind.broken_grain_pct >= thresholds.warning  ? "ATENCION"
     : "NORMAL";
 
   const overallStatus = alerts.some(a => a.level === "CRITICO") ? "CRITICO"
@@ -261,8 +271,8 @@ export function SubsistemaTrilla() {
           <CriticalGauge
             value={ind?.broken_grain_pct ?? null}
             level={brokenLevel}
-            warning={BROKEN_WARNING}
-            critical={BROKEN_CRITICAL}
+            warning={thresholds.warning}
+            critical={thresholds.critical}
           />
 
           <div className="grid grid-cols-1 gap-3">
@@ -326,7 +336,7 @@ export function SubsistemaTrilla() {
           dataKey="s2_broken_pct"
           label="Grano roto"
           color="#ef4444"
-          threshold={BROKEN_CRITICAL}
+          threshold={thresholds.critical}
           unit="%"
           xKey="timestamp"
           filled

@@ -238,8 +238,8 @@ export function SubsistemaCorte() {
               title="Panículas Detectadas"
               value={ind?.panicle_count ?? "—"}
               icon={<Wheat size={16} />}
-              color={ind?.panicle_density === "MUY_ALTA" ? "yellow" : "green"}
-              subtitle={ind ? `Densidad: ${ind.panicle_density}` : "Carga un frame para analizar"}
+              color={ind?.density_level === "alto" ? "yellow" : "green"}
+              subtitle={ind ? `Densidad: ${ind.density_level}` : "Carga un frame para analizar"}
             />
             <MetricCard
               title="Latencia de Inferencia"

@@ -325,17 +325,16 @@ export function Dashboard() {
             />
             <HealthBar
               label="Grano Roto"
-              value={status.s2.broken_grain_pct * 100}
+              value={status.s2.broken_grain_pct}
               max={1}
               color="#f59e0b"
             />
             <HealthBar
               label="Paja Residual"
-              value={
-                100 -
-                status.s2.intact_grain_pct -
-                status.s2.broken_grain_pct * 100
-              }
+              value={Math.max(
+                0,
+                100 - status.s2.intact_grain_pct - status.s2.broken_grain_pct,
+              )}
               max={20}
               color="#a8a29e"
             />
@@ -361,7 +360,7 @@ export function Dashboard() {
             />
             <HealthBar
               label="Grano Roto"
-              value={status.s3.broken_grain_pct}
+              value={status.s3.broken_grain_pct ?? 0}
               max={5}
               color="#f59e0b"
             />

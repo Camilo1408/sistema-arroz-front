@@ -62,10 +62,9 @@ export interface Detection {
  */
 export interface S1Indicators {
   panicle_count: number;                      // Conteo total de panículas detectadas
-  panicle_density: 'MUY_BAJA' | 'BAJA' | 'MEDIA' | 'ALTA' | 'MUY_ALTA';
+  density_level: 'bajo' | 'normal' | 'alto'; // Nivel global de densidad (backend: s1_inference.py)
   lodging_detected: boolean;                  // ¿Hay cultivo acamado?
-  lodging_zone?: string;                      // Zona donde se detectó acame
-  density_grid: number[][];                   // Cuadrícula 4x4 de densidad por región
+  lodging_conf?: number;                      // Confianza máxima de la detección de acame
   recommended_action?: string;               // Sugerencia de ajuste operativo
 }
 
