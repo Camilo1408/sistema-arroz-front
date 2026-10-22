@@ -44,21 +44,21 @@ p, li, dd { text-wrap: pretty; }
   border-radius: 6px;
 }
 
-/* ─── Entrada al hacer scroll (ver useReveal) ─────────────────── */
+/* ─── Entrada al hacer scroll (ver Reveal.jsx) ───────────────────
+   Solo opacidad y transform: se animan en la GPU sin repintar. El
+   desenfoque (filter: blur) se quitó porque en el teléfono repinta
+   bloques enteros en cada cuadro y traba el scroll. */
 .reveal {
   opacity: 0;
-  transform: translateY(4rem);
-  filter: blur(12px);
+  transform: translate3d(0, 2.5rem, 0);
   transition:
     opacity 900ms var(--ease-fluid),
-    transform 900ms var(--ease-fluid),
-    filter 900ms var(--ease-fluid);
+    transform 900ms var(--ease-fluid);
   transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal.is-visible {
   opacity: 1;
   transform: none;
-  filter: none;
 }
 
 /* ─── Frase que se ilumina palabra por palabra ───────────────── */
@@ -92,7 +92,7 @@ p, li, dd { text-wrap: pretty; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
   .tagline-word { color: rgb(var(--paper)); transition: none; }
   .tagline-word.is-accent { color: rgb(var(--straw)); }
   *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }

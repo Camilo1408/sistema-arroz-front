@@ -8,29 +8,37 @@ import { FILM, HERO } from "@/content/landing.js";
  * - La sección mide varias pantallas; dentro, un contenedor fijo (sticky)
  *   muestra el video y el scroll decide en qué segundo está.
  * - El scroll se divide en tramos iguales, uno por transición. Dentro de cada
- *   tramo el tiempo se curva (LINGER) para que la cámara se detenga un poco en
+ *   tramo el tiempo se curva (linger) para que la cámara se detenga un poco en
  *   cada foto, justo cuando aparece su texto.
  * - El video se descarga como blob: así siempre se puede saltar a cualquier
  *   segundo aunque el servidor no admita rangos.
- * - Nunca se pide un nuevo segundo mientras el decodificador sigue buscando el
- *   anterior (evita que se congele con scroll rápido en el teléfono).
+ * - Solo se pide un cuadro nuevo cuando cambia el cuadro y el decodificador
+ *   terminó la búsqueda anterior: no se forman colas que congelen el video.
+ * - En el teléfono el video es todo cuadros clave a 15 fps: cada búsqueda
+ *   decodifica un solo cuadro.
+ * - El suavizado depende del tiempo real entre cuadros (no de los Hz de la
+ *   pantalla) y los estilos solo se escriben cuando cambian.
  * - Mientras carga, o con movimiento reducido, se ven los cuadros fijos.
  */
 
 const SEGMENTS = FILM.scenes.length - 1;
-const LINGER = 0.5;
-const curve = (u) => u - (LINGER * Math.sin(2 * Math.PI * u)) / (2 * Math.PI);
-
-function timeAt(progress) {
-  const x = Math.min(Math.max(progress, 0), 1) * SEGMENTS;
-  const k = Math.min(Math.floor(x), SEGMENTS - 1);
-  const a = FILM.scenes[k].t;
-  const b = FILM.scenes[k + 1].t;
-  return a + (b - a) * curve(x - k);
-}
+const MOBILE = "(max-width: 860px), (pointer: coarse)";
 
 const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
 const media = (q) => typeof window !== "undefined" && window.matchMedia(q).matches;
+
+// En el teléfono la cámara se detiene menos en cada foto: la velocidad del
+// video varía menos y el decodificador no tiene que dar saltos tan grandes.
+function makeTimeAt(linger) {
+  const curve = (u) => u - (linger * Math.sin(2 * Math.PI * u)) / (2 * Math.PI);
+  return (progress) => {
+    const x = clamp01(progress) * SEGMENTS;
+    const k = Math.min(Math.floor(x), SEGMENTS - 1);
+    const a = FILM.scenes[k].t;
+    const b = FILM.scenes[k + 1].t;
+    return a + (b - a) * curve(x - k);
+  };
+}
 
 export function ScrollFilm() {
   const sectionRef = useRef(null);
@@ -38,6 +46,7 @@ export function ScrollFilm() {
   const captionRefs = useRef([]);
   const scrimRef = useRef(null);
   const [reduced] = useState(() => media("(prefers-reduced-motion: reduce)"));
+  const [mobile] = useState(() => media(MOBILE));
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState(0);
 
@@ -45,21 +54,20 @@ export function ScrollFilm() {
   useEffect(() => {
     if (reduced) return;
     let url;
-    let cancelled = false;
-    const src = media("(max-width: 860px), (pointer: coarse)") ? FILM.video.mobile : FILM.video.desktop;
-    fetch(src)
+    const abort = new AbortController();
+    fetch(mobile ? FILM.video.mobile : FILM.video.desktop, { signal: abort.signal })
       .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(String(r.status)))))
       .then((blob) => {
-        if (cancelled || !videoRef.current) return;
+        if (!videoRef.current) return;
         url = URL.createObjectURL(blob);
         videoRef.current.src = url;
       })
-      .catch(() => {}); // si falla, la portada sigue con los cuadros fijos
+      .catch(() => {}); // si falla o se cancela, la portada sigue con los cuadros fijos
     return () => {
-      cancelled = true;
+      abort.abort();
       if (url) URL.revokeObjectURL(url);
     };
-  }, [reduced]);
+  }, [reduced, mobile]);
 
   // iOS no pinta un video silenciado que nunca se reprodujo: se "despierta" al primer toque
   useEffect(() => {
@@ -74,38 +82,56 @@ export function ScrollFilm() {
   // Bucle de animación: solo corre mientras la sección está en pantalla
   useEffect(() => {
     const section = sectionRef.current;
+    const timeAt = makeTimeAt(mobile ? 0.3 : 0.5);
+    const fps = mobile ? 15 : 24; // cuadros por segundo del archivo que se cargó
+    const tau = mobile ? 0.11 : 0.08; // constante de suavizado, en segundos
+    const last = FILM.scenes.map(() => ({ o: -1 }));
+    let lastScrim = -1;
     let raf = 0;
+    let prevTs = 0;
     let visible = false;
     let current = 0;
     let lastActive = -1;
+    let lastFrame = -1;
 
-    const tick = () => {
+    const tick = (ts) => {
       raf = 0;
+      const dt = prevTs ? Math.min((ts - prevTs) / 1000, 0.1) : 1 / 60;
+      prevTs = ts;
+
       const rect = section.getBoundingClientRect();
       const span = rect.height - window.innerHeight;
       const target = timeAt(span > 0 ? -rect.top / span : 0);
 
-      current += (target - current) * (reduced ? 1 : 0.2);
-      if (Math.abs(target - current) < 0.002) current = target;
+      current = reduced ? target : current + (target - current) * (1 - Math.exp(-dt / tau));
+      if (Math.abs(target - current) < 0.003) current = target;
 
+      // Búsqueda en el video: solo si cambió el cuadro y no hay otra en curso
       const v = videoRef.current;
-      if (v && v.readyState >= 1 && !v.seeking && Math.abs(v.currentTime - current) > 0.02) {
-        v.currentTime = Math.min(current, (v.duration || FILM.duration) - 0.05);
+      const frame = Math.round(current * fps);
+      if (v && v.readyState >= 1 && !v.seeking && frame !== lastFrame) {
+        lastFrame = frame;
+        v.currentTime = Math.min(frame / fps, (v.duration || FILM.duration) - 0.05);
       }
 
       let nearest = 0;
       FILM.scenes.forEach((scene, i) => {
         const d = Math.abs(current - scene.t);
         if (d < Math.abs(current - FILM.scenes[nearest].t)) nearest = i;
-        const o = clamp01(1 - (d - 0.6) / 1.4);
+        // Opacidad redondeada a 1/50: evita reescribir estilos por cambios invisibles
+        const o = Math.round(clamp01(1 - (d - 0.6) / 1.4) * 50) / 50;
         const node = captionRefs.current[i];
-        if (node) {
-          node.style.opacity = o.toFixed(3);
-          node.style.transform = `translateY(${((1 - o) * 24).toFixed(1)}px)`;
-          node.style.visibility = o < 0.01 ? "hidden" : "visible";
+        if (node && o !== last[i].o) {
+          last[i].o = o;
+          node.style.opacity = o;
+          node.style.transform = `translate3d(0, ${((1 - o) * 24).toFixed(1)}px, 0)`;
+          node.style.visibility = o === 0 ? "hidden" : "visible";
           node.style.pointerEvents = o > 0.5 ? "auto" : "none";
         }
-        if (i === 0 && scrimRef.current) scrimRef.current.style.opacity = o.toFixed(3);
+        if (i === 0 && scrimRef.current && o !== lastScrim) {
+          lastScrim = o;
+          scrimRef.current.style.opacity = o;
+        }
       });
       if (nearest !== lastActive) {
         lastActive = nearest;
@@ -113,7 +139,16 @@ export function ScrollFilm() {
       }
 
       if (visible || current !== target) raf = requestAnimationFrame(tick);
+      else prevTs = 0;
     };
+
+    // Si el decodificador terminó y el scroll ya se detuvo, pide el último cuadro
+    const onSeeked = () => {
+      lastFrame = -1;
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const v = videoRef.current;
+    v?.addEventListener("seeked", onSeeked);
 
     const kick = () => {
       if (!raf) raf = requestAnimationFrame(tick);
@@ -128,11 +163,12 @@ export function ScrollFilm() {
     kick();
     return () => {
       observer.disconnect();
+      v?.removeEventListener("seeked", onSeeked);
       window.removeEventListener("scroll", kick);
       window.removeEventListener("resize", kick);
       cancelAnimationFrame(raf);
     };
-  }, [reduced]);
+  }, [reduced, mobile]);
 
   const showVideo = ready && !reduced;
 
@@ -155,20 +191,22 @@ export function ScrollFilm() {
       ))}
 
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* Cuadros fijos: mientras carga el video o con movimiento reducido */}
-        {FILM.scenes.map((scene, i) => (
-          <img
-            key={scene.still}
-            src={`/img/${scene.still}.webp`}
-            alt=""
-            aria-hidden="true"
-            loading={i === 0 ? "eager" : "lazy"}
-            fetchPriority={i === 0 ? "high" : undefined}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-fluid ${
-              !showVideo && active === i ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
+        {/* Cuadros fijos: solo mientras carga el video o con movimiento reducido.
+            Cuando el video está listo se quitan del DOM para no componer 7 capas. */}
+        {!showVideo &&
+          FILM.scenes.map((scene, i) => (
+            <img
+              key={scene.still}
+              src={`/img/${scene.still}.webp`}
+              alt=""
+              aria-hidden="true"
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchPriority={i === 0 ? "high" : undefined}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-fluid ${
+                active === i ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
 
         {!reduced && (
           <video
@@ -176,6 +214,7 @@ export function ScrollFilm() {
             muted
             playsInline
             preload="auto"
+            disablePictureInPicture
             aria-hidden="true"
             onLoadedData={() => setReady(true)}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-fluid ${
@@ -194,8 +233,8 @@ export function ScrollFilm() {
             <div
               key={scene.still}
               ref={(el) => (captionRefs.current[i] = el)}
-              className="self-end [grid-area:1/1]"
-              style={{ opacity: i === 0 ? 1 : 0 }}
+              className="self-end will-change-[opacity,transform] [grid-area:1/1]"
+              style={{ opacity: i === 0 ? 1 : 0, visibility: i === 0 ? "visible" : "hidden" }}
             >
               {i === 0 ? <HeroCopy /> : <SceneCopy scene={scene} />}
             </div>
@@ -276,8 +315,10 @@ function HeroCopy() {
 }
 
 function SceneCopy({ scene }) {
+  // Sin desenfoque de fondo en el teléfono: sobre un video que cambia cada
+  // cuadro, el desenfoque se recalcula siempre y es lo que más pesa en la GPU.
   return (
-    <div className="max-w-md rounded-3xl bg-ink/75 p-6 text-paper backdrop-blur-md sm:p-8">
+    <div className="max-w-md rounded-3xl bg-ink/85 p-6 text-paper sm:p-8 md:bg-ink/75 md:backdrop-blur-md">
       <p className="text-sm font-semibold uppercase tracking-widest text-straw">{scene.eyebrow}</p>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{scene.title}</h2>
       <p className="mt-3 text-base text-paper/80">{scene.body}</p>

@@ -35,7 +35,7 @@ export function SiteNav() {
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4">
       <nav
         aria-label="Principal"
-        className="relative z-50 mt-6 flex w-full max-w-max items-center gap-2 rounded-full border border-line/70 bg-paper/80 py-2 pl-4 pr-2 shadow-[0_8px_32px_rgb(27_38_28/0.10)] backdrop-blur-xl"
+        className="relative z-50 mt-6 flex w-full max-w-max items-center gap-2 rounded-full border border-line/70 bg-paper/95 py-2 pl-4 pr-2 shadow-[0_8px_32px_rgb(27_38_28/0.10)] lg:bg-paper/80 lg:backdrop-blur-xl"
       >
         <a href="#inicio" className="mr-2 flex items-center gap-2 text-base font-bold tracking-tight text-ink">
           <img src="/favicon.svg" alt="" className="h-6 w-6" />
@@ -84,8 +84,8 @@ export function SiteNav() {
 
       <div
         id="menu-movil"
-        className={`fixed inset-0 z-40 bg-paper/80 backdrop-blur-3xl transition-opacity duration-700 ease-fluid lg:hidden ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
+        className={`fixed inset-0 z-40 transition-opacity duration-700 ease-fluid lg:hidden ${
+          open ? "bg-paper/80 opacity-100 backdrop-blur-3xl" : "pointer-events-none bg-paper opacity-0"
         }`}
         aria-hidden={!open}
       >
