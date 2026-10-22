@@ -29,3 +29,6 @@ dist-ssr
 *.pyc
 /dist
 *.md
+
+# Skills de Claude Code del proyecto
+!.claude/skills/**

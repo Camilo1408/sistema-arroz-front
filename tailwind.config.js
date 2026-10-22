@@ -1,50 +1,31 @@
 // tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}", // Tailwind escanea TODOS los archivos en src/
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      // Colores personalizados para el sistema
+      // Los colores viven como variables en src/index.css (:root),
+      // aquí solo se exponen como clases de Tailwind.
       colors: {
-        // Verde: estado normal, grano íntegro
-        "arroz-green": {
-          100: "#dcfce7",
-          500: "#22c55e",
-          700: "#15803d",
-        },
-        // Amarillo: estado de atención
-        "arroz-yellow": {
-          100: "#fef9c3",
-          500: "#eab308",
-          700: "#a16207",
-        },
-        // Rojo: estado crítico, alertas
-        "arroz-red": {
-          100: "#fee2e2",
-          500: "#ef4444",
-          700: "#b91c1c",
-        },
-        // Azul: color principal de la app, navegación
-        "arroz-blue": {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          900: "#1e3a8a",
-        },
-        // Gris oscuro: fondo de la aplicación
-        "arroz-dark": {
-          800: "#1e293b",
-          900: "#0f172a",
-        },
+        paper: "rgb(var(--paper) / <alpha-value>)",
+        "paper-deep": "rgb(var(--paper-deep) / <alpha-value>)",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        "ink-soft": "rgb(var(--ink-soft) / <alpha-value>)",
+        field: "rgb(var(--field) / <alpha-value>)",
+        "field-deep": "rgb(var(--field-deep) / <alpha-value>)",
+        straw: "rgb(var(--straw) / <alpha-value>)",
+        "straw-soft": "rgb(var(--straw-soft) / <alpha-value>)",
+        line: "rgb(var(--line) / <alpha-value>)",
       },
-      // Animación para el indicador de "activo"
-      animation: {
-        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      fontFamily: {
+        sans: ["Manrope", "system-ui", "sans-serif"],
+        mono: ['"Geist Mono"', "ui-monospace", "monospace"],
+      },
+      maxWidth: {
+        hero: "680px",
+      },
+      transitionTimingFunction: {
+        fluid: "cubic-bezier(0.32, 0.72, 0, 1)",
       },
     },
   },
