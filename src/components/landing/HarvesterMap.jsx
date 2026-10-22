@@ -29,7 +29,7 @@ export function HarvesterMap() {
             onClick={() => setCurrent(h.n)}
             onMouseEnter={() => setCurrent(h.n)}
             style={{ left: `${h.x}%`, top: `${h.y}%` }}
-            className={`hotspot-ring absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full font-mono text-sm font-medium shadow-[0_4px_16px_rgb(27_38_28/0.35)] transition-all duration-500 ease-fluid hover:scale-110 active:scale-95 ${
+            className={`hotspot-ring absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full font-mono text-xs font-medium sm:h-8 sm:w-8 sm:text-sm shadow-[0_4px_16px_rgb(27_38_28/0.35)] transition-all duration-500 ease-fluid hover:scale-110 active:scale-95 ${
               h.n === current ? "bg-straw text-ink" : "bg-ink/85 text-paper"
             }`}
           >

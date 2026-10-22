@@ -13,7 +13,10 @@ export function SiteNav() {
     const sections = ids.map((id) => document.getElementById(id)).filter(Boolean);
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => e.isIntersecting && setActive(e.target.id));
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+          else setActive((cur) => (cur === e.target.id ? "" : cur));
+        });
       },
       { rootMargin: "-45% 0px -50% 0px" },
     );

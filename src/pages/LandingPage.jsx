@@ -10,7 +10,7 @@ import {
   FOOTER,
 } from "@/content/landing.js";
 import { SiteNav } from "@/components/landing/SiteNav.jsx";
-import { Hero } from "@/components/landing/Hero.jsx";
+import { ScrollFilm } from "@/components/landing/ScrollFilm.jsx";
 import { TaglineReveal } from "@/components/landing/TaglineReveal.jsx";
 import { HarvesterMap } from "@/components/landing/HarvesterMap.jsx";
 import { Faq } from "@/components/landing/Faq.jsx";
@@ -85,7 +85,7 @@ export default function LandingPage() {
       <SiteNav />
 
       <main id="contenido">
-        <Hero />
+        <ScrollFilm />
 
         {/* ── El proyecto ─────────────────────────────────────────── */}
         <section id="proyecto" className="mx-auto max-w-6xl px-6 py-24 sm:py-32">

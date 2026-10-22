@@ -20,9 +20,65 @@ export const HERO = {
   title: ["Ver de cerca el corte", "de la cosecha de arroz"],
   subtitle:
     "RiceVi instala cámaras y sensores en una cosechadora para registrar cómo queda el cultivo después del corte y qué llega a la tolva. Con esos datos se entrenarán modelos de visión artificial que ayuden al operario a leer lo que pasa en el lote.",
-  cta: { label: "Conocer el proyecto", href: "#proyecto" },
-  secondary: { label: "Ver cómo funciona", href: "#sistema" },
-  proof: ["4 cámaras", "4 sensores", "Ninguna conexión a la máquina"],
+  cta: { label: "Recorrer el lote", href: "#escena-2" },
+  secondary: { label: "Saltar al proyecto", href: "#proyecto" },
+  proof: ["4 cámaras", "3 sensores y un GPS", "Ninguna conexión a la máquina"],
+};
+
+// Recorrido en video que avanza con el scroll (portada).
+// `t` es el segundo del video donde aparece la foto de cada escena;
+// `still` es ese mismo cuadro, que se ve mientras carga el video o con
+// movimiento reducido. La escena 1 usa el texto de HERO.
+export const FILM = {
+  video: { desktop: "/video/recorrido-escritorio.mp4", mobile: "/video/recorrido-movil.mp4" },
+  duration: 29.2,
+  hint: "Desliza para recorrer el lote",
+  scenes: [
+    { t: 0, still: "escena-1" },
+    {
+      t: 4.84,
+      still: "escena-2",
+      eyebrow: "En el lote",
+      title: "La cosechadora entra al arrozal",
+      body: "RiceVi viaja montado en una cosechadora durante la cosecha, sin intervenir la máquina.",
+    },
+    {
+      t: 9.68,
+      still: "escena-3",
+      eyebrow: "A bordo",
+      title: "Cámaras y sensores con batería propia",
+      body: "Cuatro cámaras, un sensor en el molinete, dos sensores de altura en el cabezal y un GPS en el techo de la cabina.",
+    },
+    {
+      t: 14.52,
+      still: "escena-4",
+      eyebrow: "Tolva",
+      title: "Una cámara mira lo que llega a la tolva",
+      body: "Observa el grano acumulado para estimar qué parte no es grano: paja, cascarilla o residuos.",
+    },
+    {
+      t: 19.36,
+      still: "escena-5",
+      eyebrow: "Sin cables a la máquina",
+      title: "Todo se guarda en la cabina",
+      body: "Una Raspberry Pi recibe cada imagen con su hora, las lecturas de los sensores y la velocidad que entrega el GPS.",
+    },
+    {
+      t: 24.2,
+      still: "escena-6",
+      eyebrow: "Antes del corte",
+      title: "Lo que está por entrar al cabezal",
+      body: "Una cámara mira el cultivo de frente y clasifica qué tan acamado está: erecto, moderado o severo.",
+    },
+    {
+      t: 29.2,
+      still: "escena-7",
+      eyebrow: "Después del corte",
+      title: "Y lo que queda en el suelo",
+      body: "Dos cámaras detrás del cabezal miran la franja recién cortada para estimar cuánto material útil sigue visible.",
+      cta: { label: "Conocer el proyecto", href: "#proyecto" },
+    },
+  ],
 };
 
 export const PROBLEM = {
@@ -77,7 +133,7 @@ export const OBSERVES = {
     },
   ],
   context:
-    "Cuatro sensores registran además el contexto de la máquina: las vueltas del molinete, la velocidad de avance, estimada desde una rueda, y la altura del cabezal a cada lado.",
+    "Tres sensores y un GPS registran además el contexto de la máquina: las vueltas del molinete, la altura del cabezal a cada lado y la velocidad de avance.",
 };
 
 // Posiciones en % sobre la foto cosechadora_cerca (vista lateral).
@@ -86,7 +142,7 @@ export const SYSTEM = {
   eyebrow: "El sistema",
   title: "Dónde va cada pieza",
   intro:
-    "Ocho módulos pequeños con batería propia, una central en la cabina y una red Wi-Fi dedicada. Nada se conecta a la cosechadora.",
+    "Siete módulos pequeños con batería propia, un GPS, una central en la cabina y una red Wi-Fi dedicada. Nada se conecta a la cosechadora.",
   hotspots: [
     {
       n: 1,
@@ -108,28 +164,36 @@ export const SYSTEM = {
       n: 3,
       x: 11,
       y: 61,
-      title: "Sensores del molinete y del cabezal",
-      ids: "NH01 · NU01 · NU02",
-      text: "Uno cuenta las vueltas del molinete; dos ultrasónicos miden la altura en cada extremo del cabezal.",
+      title: "Sensor del molinete",
+      ids: "NH01",
+      text: "Un sensor magnético en el eje del molinete cuenta sus vueltas.",
     },
     {
       n: 4,
-      x: 54,
+      x: 22,
       y: 73,
-      title: "Sensor de la rueda",
-      ids: "NH02",
-      text: "Cuenta las vueltas de una rueda para estimar la velocidad de avance. No hay GPS.",
+      title: "Sensores de altura del cabezal",
+      ids: "NU01 · NU02",
+      text: "Dos ultrasónicos, uno en cada extremo del cabezal, miden la distancia al suelo. Son nodos separados del sensor del molinete.",
     },
     {
       n: 5,
+      x: 39,
+      y: 35,
+      title: "Antena GPS",
+      ids: "GPS USB · u-blox",
+      text: "Un receptor GPS sobre el techo de la cabina, conectado por USB a la central, mide la velocidad de avance.",
+    },
+    {
+      n: 6,
       x: 42,
-      y: 45,
+      y: 46,
       title: "Central en la cabina",
       ids: "RPI01",
       text: "Una Raspberry Pi 5 con batería propia recibe, verifica y guarda todo. El operario la consulta desde un navegador.",
     },
     {
-      n: 6,
+      n: 7,
       x: 51,
       y: 38,
       title: "Cámara de la tolva",
@@ -138,7 +202,7 @@ export const SYSTEM = {
     },
   ],
   facts: [
-    { value: "8", label: "módulos ESP32, uno por cámara o sensor" },
+    { value: "7", label: "módulos ESP32, uno por cámara o sensor" },
     { value: "1 foto/s", label: "por cada cámara del corte" },
     { value: "≈ 15 GB", label: "de datos en una jornada de ocho horas" },
     { value: "0", label: "cables hacia la máquina" },
@@ -148,7 +212,7 @@ export const SYSTEM = {
 export const PHASES = {
   eyebrow: "Cómo funciona",
   title: "Primero aprender a ver, después analizar",
-  flow: ["Cámaras y sensores", "Red Wi-Fi propia", "Central en la cabina", "Pantalla del operario"],
+  flow: ["Cámaras, sensores y GPS", "Red Wi-Fi propia", "Central en la cabina", "Pantalla del operario"],
   items: [
     {
       tag: "Fase 1",
@@ -230,7 +294,7 @@ export const FAQ = [
   },
   {
     q: "¿Necesita internet en el campo?",
-    a: "No. Los módulos se comunican por una red Wi-Fi propia de la máquina y todo se guarda en la central de la cabina.",
+    a: "No. Los módulos se comunican por una red Wi-Fi propia de la máquina y todo se guarda en la central de la cabina. El GPS tampoco la necesita: recibe la señal directamente de los satélites.",
   },
   {
     q: "¿Qué se hace con las imágenes?",
