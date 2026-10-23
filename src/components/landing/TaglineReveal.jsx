@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { TAGLINE } from "@/content/landing.js";
 
 // Palabras que se encienden en amarillo en vez de blanco
-const ACCENT = new Set(["verla.", "datos"]);
+const ACCENT = new Set(["invisible", "número"]);
 
 /**
  * Frase grande que se ilumina palabra por palabra mientras la sección

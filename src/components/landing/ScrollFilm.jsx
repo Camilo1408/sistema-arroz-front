@@ -276,10 +276,19 @@ export function ScrollFilm() {
 function HeroCopy() {
   return (
     <div className="max-w-2xl">
-      <p className="text-sm font-semibold uppercase tracking-widest text-straw-soft">{HERO.eyebrow}</p>
-      <h1 className="mt-4 max-w-hero text-4xl font-bold tracking-tight text-paper sm:text-6xl">
+      <h1 className="max-w-hero text-4xl font-bold tracking-tight text-paper sm:text-6xl">
         {HERO.title[0]}
-        <br className="hidden sm:block" /> {HERO.title[1]}
+        <br className="hidden sm:block" />{" "}
+        {HERO.title[1].split(HERO.highlight).map((part, i) =>
+          i === 0 ? (
+            part
+          ) : (
+            <span key={i}>
+              <span className="whitespace-nowrap text-straw">{HERO.highlight}</span>
+              {part}
+            </span>
+          ),
+        )}
       </h1>
       <p className="mt-4 max-w-xl text-base text-paper sm:mt-6 sm:text-lg">{HERO.subtitle}</p>
       <div className="mt-6 flex flex-wrap items-center gap-6 sm:mt-8">

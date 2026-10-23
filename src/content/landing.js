@@ -2,26 +2,28 @@
 // ============================================================
 // TODO EL TEXTO DE LA LANDING EN UN SOLO LUGAR
 // ============================================================
-// Fuente: docs/00_ESTADO_ACTUAL_PROYECTO.md y docs/01–03 v1.2
-// (22-oct-2026). Alcance: corte (pre y post) y tolva.
+// Fuentes: Anexo 2 del concurso NEIVA FEST (documento técnico,
+// 22-oct-2026) y docs/01–03 v1.2. Alcance: corte y tolva.
 // Para actualizar la página basta con editar este archivo.
 
 export const NAV_LINKS = [
-  { label: "Proyecto", href: "#proyecto" },
-  { label: "Qué observa", href: "#observa" },
+  { label: "Problema", href: "#problema" },
+  { label: "Impacto", href: "#impacto" },
+  { label: "Cómo funciona", href: "#proceso" },
   { label: "Sistema", href: "#sistema" },
-  { label: "Fases", href: "#fases" },
-  { label: "Estado", href: "#estado" },
+  { label: "Avance", href: "#estado" },
   { label: "Equipo", href: "#equipo" },
 ];
 
 export const HERO = {
-  eyebrow: "Proyecto de grado · Universidad Surcolombiana",
-  title: ["Ver de cerca el corte", "de la cosecha de arroz"],
+  // Cifras del Anexo 2: pérdida del cabezal (1,44 %) en la producción del
+  // Huila 2025 al precio de junio de 2026, y escenario de reducirla a la mitad.
+  title: ["Cada año el Huila deja", "$4.560 millones de arroz en el lote"],
+  highlight: "$4.560 millones",
   subtitle:
-    "RiceVi instala cámaras y sensores en una cosechadora para registrar cómo queda el cultivo después del corte y qué llega a la tolva. Con esos datos se entrenarán modelos de visión artificial que ayuden al operario a leer lo que pasa en el lote.",
+    "Son 3.400 toneladas que se pierden solo en el cabezal. Con RiceVi, reducir esa pérdida a la mitad recuperaría 1.700 toneladas y unos $2.280 millones al año.",
   cta: { label: "Recorrer el lote", href: "#escena-2" },
-  secondary: { label: "Saltar al proyecto", href: "#proyecto" },
+  secondary: { label: "Ir al problema", href: "#problema" },
   proof: ["4 cámaras", "3 sensores y un GPS", "Ninguna conexión a la máquina"],
 };
 
@@ -40,7 +42,7 @@ export const FILM = {
       still: "escena-2",
       eyebrow: "En el lote",
       title: "La cosechadora entra al arrozal",
-      body: "RiceVi viaja montado en una cosechadora durante la cosecha, sin intervenir la máquina.",
+      body: "RiceVi viaja montado en la cosechadora durante la cosecha y se retira sin modificarla.",
     },
     {
       t: 9.68,
@@ -54,86 +56,130 @@ export const FILM = {
       still: "escena-4",
       eyebrow: "Tolva",
       title: "Una cámara mira lo que llega a la tolva",
-      body: "Observa el grano acumulado para estimar qué parte no es grano: paja, cascarilla o residuos.",
+      body: "Mide cuánto material que no es grano entra con la cosecha, para cuidar la calidad de lo que se entrega.",
     },
     {
       t: 19.36,
       still: "escena-5",
-      eyebrow: "Sin cables a la máquina",
-      title: "Todo se guarda en la cabina",
-      body: "Una Raspberry Pi recibe cada imagen con su hora, las lecturas de los sensores y la velocidad que entrega el GPS.",
+      eyebrow: "En la cabina",
+      title: "La inteligencia artificial va a bordo",
+      body: "Una Raspberry Pi analiza las imágenes ahí mismo, sin internet, y muestra el diagnóstico en una tablet o un teléfono.",
     },
     {
       t: 24.2,
       still: "escena-6",
       eyebrow: "Antes del corte",
       title: "Lo que está por entrar al cabezal",
-      body: "Una cámara mira el cultivo de frente y clasifica qué tan acamado está: erecto, moderado o severo.",
+      body: "Una cámara clasifica si el cultivo está erecto o volcado, para ajustar el cabezal y el molinete a tiempo.",
     },
     {
       t: 29.2,
       still: "escena-7",
       eyebrow: "Después del corte",
-      title: "Y lo que queda en el suelo",
-      body: "Dos cámaras detrás del cabezal miran la franja recién cortada para estimar cuánto material útil sigue visible.",
-      cta: { label: "Conocer el proyecto", href: "#proyecto" },
+      title: "Y el grano que queda en el suelo",
+      body: "Dos cámaras detrás del cabezal miden el grano útil que queda en el lote, el indicador directo de la pérdida.",
+      cta: { label: "Ver el problema", href: "#problema" },
     },
   ],
 };
 
+// Pérdida medida al cosechar arroz con cosechadora en Colombia [1].
 export const PROBLEM = {
-  eyebrow: "El proyecto",
-  title: "Lo que pasa detrás del cabezal no se ve desde la cabina",
-  paragraphs: [
-    "En la cosecha mecanizada, parte del grano puede quedarse en el lote o llegar a la tolva mezclado con paja y residuos. El operario ajusta la máquina con lo que alcanza a ver y con su experiencia, pero no tiene un registro continuo de cómo queda el corte ni de qué entra a la tolva.",
-    "RiceVi busca darle ese registro: observar el proceso con cámaras, guardar cada imagen junto con el estado de la máquina en ese instante y, más adelante, analizarlo con visión artificial.",
+  eyebrow: "El problema",
+  total: "7,17 %",
+  title: "del arroz se pierde al cosecharlo",
+  lead: "Es grano que se sembró, se fertilizó y se pagó, pero nunca llegó a la tolva.",
+  // Colores validados para daltonismo sobre el fondo de la página
+  parts: [
+    { label: "Cabezal de corte", value: 1.44, color: "#C08A0C", focus: true },
+    { label: "Trilla", value: 1.56, color: "#2F7A3E" },
+    { label: "Separación y limpieza", value: 4.12, color: "#8A63B0" },
   ],
-  note: "La meta es aportar a reducir las pérdidas en la cosecha de arroz. El proyecto mide y describe lo que observa; no promete un porcentaje de reducción.",
+  reference: {
+    label: "Con operario entrenado y máquina bien ajustada",
+    min: 1.25,
+    max: 2.2,
+  },
+  paragraphs: [
+    "Desde la cabina el operario no ve el grano que queda detrás del cabezal ni lo que entra a la tolva. Ajusta altura, molinete y velocidad por experiencia, y se entera de la pérdida cuando ya ocurrió.",
+    "RiceVi empieza por el cabezal, la primera pérdida del proceso y la que se puede corregir de forma más directa.",
+  ],
+  source:
+    "Chaparro, Devia y Zea (1984), 39 observaciones en Ambalema, Tolima. Referente de Paulsen, Kalita y Rausch (2015, ASABE).",
 };
 
 export const TAGLINE =
-  "Antes de mejorar la cosecha hay que poder verla. RiceVi convierte cada jornada en datos que se pueden revisar.";
+  "Lo que no se ve no se puede corregir. RiceVi convierte la pérdida invisible en un número que el operario puede usar.";
 
-export const OBSERVES = {
-  eyebrow: "Qué observa",
-  title: "Dos zonas de la cosechadora: el corte y la tolva",
-  zones: [
+// Escenarios calculados en el Anexo 2 con el 1,44 % del cabezal [1],
+// el rendimiento del Huila (7,40 t/ha) y su producción 2025 [3], y el
+// precio del arroz paddy verde de junio de 2026, $1,34 millones/t [6].
+export const IMPACT = {
+  eyebrow: "Impacto",
+  title: "Lo que se recuperaría en el Huila",
+  intro:
+    "El Huila tiene el mayor rendimiento de arroz del país, 7,40 toneladas por hectárea, y en 2025 produjo 236.475 toneladas. Solo el cabezal deja en el lote el 1,44 % de esa cosecha.",
+  scenarios: [
     {
-      id: "pre-corte",
-      group: "Corte",
-      title: "Antes del corte",
-      devices: ["CAM01"],
-      text: "Una cámara mira el cultivo que está por entrar al cabezal y lo clasifica según qué tan acamado está, es decir, qué tanto se han doblado las plantas.",
-      output: "Erecto · moderado · severo",
-      image: "vista_frontal",
-      alt: "Vista desde la cabina sobre el molinete y el cabezal, con el cultivo de arroz al frente",
-      orientation: "landscape",
+      id: "mitad",
+      label: "Si se reduce a la mitad",
+      totalAfter: "6,45 %",
+      payback: "56",
+      figures: [
+        { scale: "Por hectárea", amount: "≈ 53 kg", money: "≈ $71.400" },
+        { scale: "Un lote de 10 hectáreas", amount: "≈ 530 kg", money: "≈ $714.000" },
+        { scale: "Un año en el Huila", amount: "≈ 1.700 t", money: "≈ $2.280 millones" },
+      ],
     },
     {
-      id: "post-corte",
-      group: "Corte",
-      title: "Después del corte",
-      devices: ["CAM02", "CAM03"],
-      text: "Dos cámaras detrás del cabezal, una a cada lado, miran la franja recién cortada para estimar cuánto material útil sigue visible en el suelo.",
-      output: "Material útil visible tras el paso del cabezal",
-      image: "arrocera_cosechada",
-      alt: "Lote de arroz recién cosechado, con rastrojo y huellas de la máquina",
-      orientation: "portrait",
-    },
-    {
-      id: "tolva",
-      group: "Tolva",
-      title: "Lo que llega a la tolva",
-      devices: ["CAM04"],
-      text: "Una cámara dentro de la tolva, con una luz que se enciende solo al tomar la foto, observa la superficie del grano acumulado para estimar qué parte no es grano.",
-      output: "Material distinto al grano: paja, cascarilla, residuos",
-      image: "tolva",
-      alt: "Interior de la tolva de la cosechadora con el grano de arroz acumulado y el sinfín de carga",
-      orientation: "portrait",
+      id: "techo",
+      label: "Si se elimina",
+      totalAfter: "5,73 %",
+      payback: "28",
+      figures: [
+        { scale: "Por hectárea", amount: "≈ 107 kg", money: "≈ $142.800" },
+        { scale: "Un lote de 10 hectáreas", amount: "≈ 1,07 t", money: "≈ $1,4 millones" },
+        { scale: "Un año en el Huila", amount: "≈ 3.400 t", money: "≈ $4.560 millones" },
+      ],
     },
   ],
-  context:
-    "Tres sensores y un GPS registran además el contexto de la máquina: las vueltas del molinete, la altura del cabezal a cada lado y la velocidad de avance.",
+  cost: "El equipo cuesta del orden de US$ 1.000 por cosechadora, unos $4 millones, sin pagos mensuales.",
+  indirect:
+    "Además, la velocidad de avance y el molinete influyen en lo que se pierde en la trilla y la limpieza. Ese efecto se medirá en campo y no se suma a estas cifras.",
+  note:
+    "Son escenarios calculados, no resultados medidos. Fuentes: Chaparro et al. (1984); DANE y Fedearroz, Encuesta Nacional de Arroz Mecanizado 2025; precio de Fedearroz de junio de 2026.",
+};
+
+export const PROCESS = {
+  eyebrow: "Cómo funciona",
+  title: "Ver, ajustar y comprobar",
+  steps: [
+    {
+      n: "01",
+      title: "Observa tres puntos de la cosecha",
+      text: "Cuatro cámaras miran el cultivo antes del corte, el suelo después del cabezal y el interior de la tolva. Tres sensores y un GPS registran el molinete, la altura del cabezal y la velocidad de avance.",
+      points: [
+        { label: "Antes del corte", detail: "Cultivo erecto o volcado" },
+        { label: "Después del corte", detail: "Grano útil que queda en el suelo" },
+        { label: "Tolva", detail: "Material que no es grano" },
+      ],
+    },
+    {
+      n: "02",
+      title: "Analiza a bordo, sin internet",
+      text: "Una Raspberry Pi 5 en la cabina ejecuta tres modelos de visión artificial y calcula el índice del molinete, la relación entre su velocidad y la de avance, uno de los ajustes que más pesa en la pérdida.",
+    },
+    {
+      n: "03",
+      title: "El operario ajusta y comprueba",
+      text: "En una tablet o un teléfono ve el diagnóstico y sugerencias como «considere bajar la velocidad de avance». Hace el ajuste y en segundos ve si el grano en el suelo disminuyó. El sistema no toca los controles.",
+    },
+  ],
+  images: [
+    { name: "vista_frontal", alt: "Vista desde la cabina sobre el molinete y el cabezal, con el cultivo de arroz al frente" },
+    { name: "arrocera_cosechada", alt: "Lote de arroz recién cosechado, con rastrojo y huellas de la máquina" },
+    { name: "tolva", alt: "Interior de la tolva con el grano de arroz acumulado y el sinfín de carga" },
+  ],
 };
 
 // Posiciones en % sobre la foto cosechadora_cerca (vista lateral).
@@ -142,7 +188,7 @@ export const SYSTEM = {
   eyebrow: "El sistema",
   title: "Dónde va cada pieza",
   intro:
-    "Siete módulos pequeños con batería propia, un GPS, una central en la cabina y una red Wi-Fi dedicada. Nada se conecta a la cosechadora.",
+    "Siete módulos pequeños con batería propia, un GPS, una central en la cabina y una red Wi-Fi dedicada. Se instala y se retira sin modificar la cosechadora.",
   hotspots: [
     {
       n: 1,
@@ -203,29 +249,9 @@ export const SYSTEM = {
   ],
   facts: [
     { value: "7", label: "módulos ESP32, uno por cámara o sensor" },
-    { value: "1 foto/s", label: "por cada cámara del corte" },
-    { value: "≈ 15 GB", label: "de datos en una jornada de ocho horas" },
-    { value: "0", label: "cables hacia la máquina" },
-  ],
-};
-
-export const PHASES = {
-  eyebrow: "Cómo funciona",
-  title: "Primero aprender a ver, después analizar",
-  flow: ["Cámaras, sensores y GPS", "Red Wi-Fi propia", "Central en la cabina", "Pantalla del operario"],
-  items: [
-    {
-      tag: "Fase 1",
-      title: "Construir el dataset",
-      status: "Primera campaña",
-      text: "Durante la cosecha el sistema solo captura, verifica y guarda. Cada foto queda unida a su hora exacta y a las lecturas de los sensores. Donde iría un resultado, la pantalla dice «sin modelo»: si no hay medida, no se inventa un número.",
-    },
-    {
-      tag: "Fase 2",
-      title: "Analizar a bordo",
-      status: "Con modelos entrenados",
-      text: "La misma Raspberry Pi ejecuta los modelos en la cabina y muestra al operario el diagnóstico, con sugerencias generales basadas en el manual de la máquina y en la literatura. El operario decide; el sistema no acciona nada.",
-    },
+    { value: "3", label: "modelos de visión artificial" },
+    { value: "≈ US$ 1.000", label: "de hardware por cosechadora" },
+    { value: "0", label: "costos de nube o conectividad" },
   ],
 };
 
@@ -239,46 +265,53 @@ export const PRINCIPLES = {
     },
     {
       title: "No inventa datos",
-      text: "Si un sensor o un modelo no da medida, el valor queda vacío, nunca en cero.",
+      text: "Si un sensor o un modelo no da medida, el valor queda vacío y la pantalla dice «sin modelo», nunca un número falso.",
     },
     {
       title: "No decide por el operario",
-      text: "Las sugerencias son orientaciones generales. El ajuste lo hace quien maneja.",
+      text: "Las sugerencias salen del manual de la máquina y de la literatura técnica. El ajuste lo hace quien maneja.",
     },
     {
-      title: "No promete cifras",
-      text: "Describe lo que observa. No afirma cuánto se reducen las pérdidas.",
+      title: "No da cifras sin medirlas",
+      text: "Las cifras de impacto son escenarios. El efecto real se medirá en campo, comparando el grano en el suelo antes y después de cada ajuste.",
     },
   ],
 };
 
 export const STATUS = {
-  eyebrow: "Estado",
+  eyebrow: "Avance",
   title: "En qué va el proyecto",
   updated: "Octubre de 2026",
-  columns: [
+  steps: [
     {
-      label: "Hecho",
+      when: "Hoy",
       tone: "done",
-      items: [
-        "Arquitectura del sistema definida y documentada",
-        "Hardware de los nodos y de la central recibido",
-        "Software de la central probado en banco",
-      ],
+      title: "Prototipo funcional en banco",
+      text: "La central ya recibe, verifica y guarda datos, con 40 comprobaciones automáticas. Las placas están en manos del equipo y el código es público.",
     },
     {
-      label: "En curso",
+      when: "Hasta mediados de noviembre de 2026",
       tone: "now",
-      items: ["Montaje y firmware de los nodos", "Pruebas de banco de la luz de la tolva y de los sensores de altura"],
+      title: "Montaje de los siete nodos y el GPS",
+      text: "Cableado definitivo, soportes impresos en 3D y pruebas de banco.",
     },
     {
-      label: "Siguiente",
+      when: "Noviembre y diciembre de 2026",
       tone: "next",
-      items: [
-        "Salidas de campo para construir el dataset",
-        "Anotación de imágenes y entrenamiento de los modelos",
-        "Medición del desempeño de los modelos en la Raspberry Pi",
-      ],
+      title: "Fase 1, captura del dataset",
+      text: "Jornadas reales de cosecha para construir el primer dataset de imágenes de cosecha del Huila.",
+    },
+    {
+      when: "Noviembre de 2026 a enero de 2027",
+      tone: "next",
+      title: "Etiquetado y entrenamiento",
+      text: "Los modelos mejoran a medida que llegan las imágenes.",
+    },
+    {
+      when: "Enero y febrero de 2027",
+      tone: "next",
+      title: "Fase 2, primeras salidas con los modelos",
+      text: "La inteligencia artificial funcionando en la cabina y la pérdida medida en el lote.",
     },
   ],
 };
@@ -286,33 +319,34 @@ export const STATUS = {
 export const FAQ = [
   {
     q: "¿El sistema controla la cosechadora?",
-    a: "No. Solo observa y registra. No se conecta a la máquina ni cambia ningún ajuste; las decisiones son del operario.",
+    a: "No. Solo observa, diagnostica y sugiere. No se conecta a la máquina ni cambia ningún ajuste; las decisiones son del operario.",
   },
   {
     q: "¿Qué es el acame?",
-    a: "Es cuando las plantas de arroz se doblan o caen antes de la cosecha. Un cultivo acamado es más difícil de cortar, por eso conviene saber en qué estado entra al cabezal.",
+    a: "Es cuando las plantas de arroz se doblan o caen antes de la cosecha. Un cultivo acamado obliga a reajustar el cabezal y el molinete sobre la marcha, y un ajuste tardío se paga en grano perdido.",
   },
   {
     q: "¿Necesita internet en el campo?",
-    a: "No. Los módulos se comunican por una red Wi-Fi propia de la máquina y todo se guarda en la central de la cabina. El GPS tampoco la necesita: recibe la señal directamente de los satélites.",
+    a: "No. Los módulos se comunican por una red Wi-Fi propia de la máquina y todo se analiza y se guarda en la cabina. El GPS recibe la señal directamente de los satélites.",
   },
   {
-    q: "¿Qué se hace con las imágenes?",
-    a: "Cada imagen se guarda con un identificador, su hora y una huella digital que comprueba que llegó completa. Con ellas se anotan ejemplos y se entrenan los modelos.",
+    q: "¿Sirve para otros granos?",
+    a: "Sí. Maíz, sorgo, soya o trigo se cosechan con el mismo principio de cabezal, molinete y tolva. Llevar RiceVi a otro cultivo es adaptar el montaje y entrenar su propio dataset.",
   },
 ];
 
 export const TEAM = {
   eyebrow: "Equipo",
   title: "Quiénes lo desarrollan",
-  intro: "Estudiantes de noveno semestre de la Universidad Surcolombiana.",
+  intro: "Proyecto de modalidad de grado de la Universidad Surcolombiana, diseñado y desarrollado en Neiva.",
   members: [
-    { name: "Cesar Camilo Hoyos Diaz", role: "Investigación y desarrollo" },
-    { name: "Alvaro Julian Delgado Mena", role: "Investigación y desarrollo" },
+    { name: "Cesar Camilo Hoyos Diaz", role: "Desarrollador" },
+    { name: "Alvaro Julian Delgado Mena", role: "Desarrollador" },
+    { name: "Ferley Medina Rojas", role: "Asesor, profesor de Ingeniería de Software" },
   ],
 };
 
 export const FOOTER = {
   repo: { label: "Código del sistema", href: "https://github.com/Camilo1408/config-ricevi" },
-  line: "RiceVi · Diagnóstico con visión artificial del corte en la cosecha mecanizada de arroz",
+  line: "RiceVi · Diagnóstico con visión artificial del corte de la cosecha mecanizada de arroz",
 };
