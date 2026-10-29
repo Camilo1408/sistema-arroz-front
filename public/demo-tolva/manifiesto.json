@@ -1,0 +1,108 @@
+{
+ "modelo": {
+  "carpeta": "v2",
+  "version": "20261029-0725",
+  "sha256": "4dbe1f20acc0",
+  "umbral": 0.6
+ },
+ "metricas_modelo": {
+  "error % (puntos, media)": 0.6818897890946501,
+  "recall fragmentos": 0.9619565217391305,
+  "precisión fragmentos": 0.29082426127527217,
+  "Dice verde": 0.40845707324726144,
+  "IoU verde": 0.2566421969407044,
+  "fragmentos anotados": 184,
+  "fragmentos predichos": 643,
+  "% verde medio": 1.2118859310699588
+ },
+ "metricas_regla_color": {
+  "error % (puntos, media)": 1.6246945730452678,
+  "recall fragmentos": 0.9130434782608695,
+  "precisión fragmentos": 0.012978703957590714,
+  "Dice verde": 0.15684783454783874,
+  "IoU verde": 0.08509760479236445,
+  "fragmentos anotados": 184,
+  "fragmentos predichos": 32823,
+  "% verde medio": 2.154690715020576
+ },
+ "cuadros": [
+  {
+   "nombre": "IMG_1577_0011.jpg",
+   "porcentaje": 1.5,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 216,
+    "y": 120,
+    "lado": 360
+   },
+   "latencia_ms": 1392,
+   "base": "IMG_1577_0011"
+  },
+  {
+   "nombre": "IMG_1577_0015.jpg",
+   "porcentaje": 0.784,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 0,
+    "y": 1488,
+    "lado": 360
+   },
+   "latencia_ms": 1161,
+   "base": "IMG_1577_0015"
+  },
+  {
+   "nombre": "IMG_1577_0022.jpg",
+   "porcentaje": 0.535,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 0,
+    "y": 1080,
+    "lado": 360
+   },
+   "latencia_ms": 1209,
+   "base": "IMG_1577_0022"
+  },
+  {
+   "nombre": "IMG_1577_0026.jpg",
+   "porcentaje": 0.649,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 0,
+    "y": 576,
+    "lado": 360
+   },
+   "latencia_ms": 1370,
+   "base": "IMG_1577_0026"
+  },
+  {
+   "nombre": "IMG_1577_0030.jpg",
+   "porcentaje": 2.826,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 24,
+    "y": 624,
+    "lado": 360
+   },
+   "latencia_ms": 1279,
+   "base": "IMG_1577_0030"
+  },
+  {
+   "nombre": "IMG_1577_0034.jpg",
+   "porcentaje": 0.977,
+   "ancho": 1080,
+   "alto": 1920,
+   "zona": {
+    "x": 120,
+    "y": 1416,
+    "lado": 360
+   },
+   "latencia_ms": 1136,
+   "base": "IMG_1577_0034"
+  }
+ ]
+}

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -81,6 +79,13 @@ p, li, dd { text-wrap: pretty; }
   transition: opacity 500ms var(--ease-fluid), transform 500ms var(--ease-fluid);
 }
 .hotspot-ring[aria-pressed="true"]::after { opacity: 1; transform: scale(1); }
+
+/* ─── Demo de la tolva: barrido mientras el modelo analiza ───── */
+@keyframes scan {
+  from { top: -6rem; }
+  to { top: 100%; }
+}
+.scan-line { animation: scan 1.6s var(--ease-fluid) infinite; }
 
 /* ─── Preguntas: apertura suave con grid-rows ────────────────── */
 .faq-body {

@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, CircleDashed, Circle } from "@phosphor-icons/react";
-import { PROBLEM, IMPACT, PROCESS, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
+import { PROBLEM, IMPACT, PROCESS, DEMO, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
 import { SiteNav } from "@/components/landing/SiteNav.jsx";
 import { ScrollFilm } from "@/components/landing/ScrollFilm.jsx";
 import { TaglineReveal } from "@/components/landing/TaglineReveal.jsx";
@@ -9,6 +9,7 @@ import { ImpactCalc } from "@/components/landing/ImpactCalc.jsx";
 import { Faq } from "@/components/landing/Faq.jsx";
 import { Reveal } from "@/components/landing/Reveal.jsx";
 import { Photo } from "@/components/landing/Photo.jsx";
+import { TolvaDemo } from "@/components/landing/TolvaDemo.jsx";
 
 /* ── Encabezado de sección ───────────────────────────────────────── */
 function SectionHead({ eyebrow, title, children, tone = "light" }) {
@@ -123,6 +124,18 @@ export default function LandingPage() {
               </Reveal>
             ))}
           </ol>
+        </section>
+
+        {/* ── IA en vivo: el modelo de la tolva ───────────────────── */}
+        <section id="ia" className="bg-field-deep py-24 text-paper sm:py-32">
+          <div className="mx-auto max-w-6xl px-6">
+            <SectionHead eyebrow={DEMO.eyebrow} title={DEMO.title} tone="dark">
+              <p className="mt-6 text-lg text-paper/75">{DEMO.intro}</p>
+            </SectionHead>
+            <Reveal className="mt-10">
+              <TolvaDemo />
+            </Reveal>
+          </div>
         </section>
 
         {/* ── Sistema ─────────────────────────────────────────────── */}

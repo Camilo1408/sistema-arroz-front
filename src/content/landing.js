@@ -10,6 +10,7 @@ export const NAV_LINKS = [
   { label: "Problema", href: "#problema" },
   { label: "Impacto", href: "#impacto" },
   { label: "Cómo funciona", href: "#proceso" },
+  { label: "IA en vivo", href: "#ia" },
   { label: "Sistema", href: "#sistema" },
   { label: "Avance", href: "#estado" },
   { label: "Equipo", href: "#equipo" },
@@ -57,6 +58,7 @@ export const FILM = {
       eyebrow: "Tolva",
       title: "Una cámara mira lo que llega a la tolva",
       body: "Mide cuánto material que no es grano entra con la cosecha, para cuidar la calidad de lo que se entrega.",
+      cta: { label: "Ver el modelo en vivo", href: "#ia" },
     },
     {
       t: 19.36,
@@ -182,6 +184,42 @@ export const PROCESS = {
   ],
 };
 
+// Demo del modelo de la tolva (ver TolvaDemo.jsx). Las cifras de la prueba
+// llegan de la ficha del modelo; aquí solo van los textos.
+export const DEMO = {
+  api: "http://192.168.40.2:8001",
+  eyebrow: "Inteligencia artificial en vivo",
+  title: "El primer modelo ya corre en la tolva",
+  intro:
+    "Lo entrenamos con 1.557 hojas anotadas a mano en cuadros de una cosecha real en Palermo. Aquí trabaja sobre un video que nunca vio durante el entrenamiento, y marca en naranja cada hoja y tallo verde que encuentra entre el grano.",
+  status: {
+    offline: "Sin conexión con la Raspberry Pi · resultados guardados",
+    public: "La demo en vivo corre en la Raspberry Pi de la cabina · aquí, resultados guardados",
+  },
+  firstFrame: "IMG_1577_0030.jpg",
+  measure: "material vegetal verde visible",
+  measureNote: "Fracción del área de la imagen, no de la masa.",
+  frameNote: "El acercamiento muestra la zona del cuadro con más hojas. El porcentaje es del cuadro completo.",
+  zoomCaption: "Arrastre para comparar la imagen con lo que marcó el modelo.",
+  actions: {
+    next: "Analizar otro cuadro",
+    nextSaved: "Ver otro cuadro",
+    auto: "Automático",
+    stop: "Detener",
+    upload: "Subir una foto",
+  },
+  uploadNote: "Foto fuera de las condiciones de entrenamiento: el resultado es orientativo.",
+  metricsTitle: "Frente a una regla de color, en la misma prueba",
+  metrics: [
+    { key: "recall fragmentos", label: "Hojas que encuentra", pct: true },
+    { key: "error % (puntos, media)", label: "Error en el porcentaje", unit: "puntos" },
+    { key: "precisión fragmentos", label: "De lo que marca, es hoja", pct: true },
+  ],
+  honest:
+    "Todavía marca más área de la que hay: hoy es un detector de hojas, no un medidor calibrado. Calibrarlo con muestras físicas de la tolva es el siguiente paso.",
+  test: "Prueba: 6 cuadros de un video que el modelo nunca vio, con 240 hojas anotadas a mano. La regla de color se ajustó con los mismos datos de entrenamiento del modelo.",
+};
+
 // Posiciones en % sobre la foto cosechadora_cerca (vista lateral).
 // Son aproximadas: sirven para explicar, no como plano de montaje.
 export const SYSTEM = {
@@ -287,7 +325,7 @@ export const STATUS = {
       when: "Hoy",
       tone: "done",
       title: "Prototipo funcional en banco",
-      text: "La central ya recibe, verifica y guarda datos, con 40 comprobaciones automáticas. Las placas están en manos del equipo y el código es público.",
+      text: "La central ya recibe, verifica y guarda datos, con 40 comprobaciones automáticas, y el primer modelo, el de la tolva, ya está entrenado. Las placas están en manos del equipo y el código es público.",
     },
     {
       when: "Hasta mediados de noviembre de 2026",
