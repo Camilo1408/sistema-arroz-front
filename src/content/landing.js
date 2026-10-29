@@ -129,6 +129,14 @@ export const IMPACT = {
       label: "Si se reduce a la mitad",
       totalAfter: "6,45 %",
       payback: "50",
+      steps: [
+        ["Pérdida del cabezal por hectárea", "7,40 t/ha × 1,44 % = 106,6 kg"],
+        ["Lo que se recupera por hectárea", "106,6 kg ÷ 2 = 53,3 kg × $1.522 por kg ≈ $81.100"],
+        ["Un lote de 10 hectáreas", "53,3 kg × 10 ≈ 530 kg · $81.100 × 10 ≈ $811.000"],
+        ["Un año en el Huila", "236.475 t × 1,44 % = 3.405 t ÷ 2 = 1.703 t × $1.522.240 ≈ $2.590 millones"],
+        ["Pérdida total", "7,17 % − 0,72 % = 6,45 %"],
+        ["Pago del equipo", "US$ 1.300 × $3.162 ≈ $4,1 millones ÷ $81.100 por ha ≈ 50 ha"],
+      ],
       figures: [
         { scale: "Por hectárea", amount: "≈ 53 kg", money: "≈ $81.100" },
         { scale: "Un lote de 10 hectáreas", amount: "≈ 530 kg", money: "≈ $811.000" },
@@ -140,6 +148,14 @@ export const IMPACT = {
       label: "Si se elimina",
       totalAfter: "5,73 %",
       payback: "25",
+      steps: [
+        ["Pérdida del cabezal por hectárea", "7,40 t/ha × 1,44 % = 106,6 kg"],
+        ["Lo que se recupera por hectárea", "106,6 kg × $1.522 por kg ≈ $162.200"],
+        ["Un lote de 10 hectáreas", "106,6 kg × 10 ≈ 1,07 t · $162.200 × 10 ≈ $1,6 millones"],
+        ["Un año en el Huila", "236.475 t × 1,44 % = 3.405 t × $1.522.240 ≈ $5.180 millones"],
+        ["Pérdida total", "7,17 % − 1,44 % = 5,73 %"],
+        ["Pago del equipo", "US$ 1.300 × $3.162 ≈ $4,1 millones ÷ $162.200 por ha ≈ 25 ha"],
+      ],
       figures: [
         { scale: "Por hectárea", amount: "≈ 107 kg", money: "≈ $162.200" },
         { scale: "Un lote de 10 hectáreas", amount: "≈ 1,07 t", money: "≈ $1,6 millones" },
@@ -152,6 +168,20 @@ export const IMPACT = {
     "Además, la velocidad de avance y el molinete influyen en lo que se pierde en la trilla y la limpieza. Ese efecto se medirá en campo y no se suma a estas cifras.",
   note:
     "Son escenarios calculados, no resultados medidos. Fuentes: Chaparro et al. (1984); DANE y Fedearroz, Encuesta Nacional de Arroz Mecanizado 2025; precio del arroz paddy verde de Fedearroz, septiembre de 2026.",
+  method: {
+    label: "¿Cómo se calculó?",
+    lead: "Multiplicamos datos públicos: cuánto deja el cabezal, cuánto produce el Huila y cuánto vale la tonelada. Es un escenario, no una medición; medir la pérdida real es lo que hará RiceVi en campo.",
+    inputsTitle: "Los datos",
+    stepsTitle: "Las operaciones",
+    inputs: [
+      { label: "Pérdida en el cabezal", value: "1,44 % de la cosecha", source: "Chaparro, Devia y Zea (1984), 39 observaciones en Ambalema, Tolima" },
+      { label: "Rendimiento del Huila", value: "7,40 t/ha", source: "DANE y Fedearroz, Encuesta Nacional de Arroz Mecanizado 2025" },
+      { label: "Producción del Huila en 2025", value: "236.475 t", source: "La misma encuesta" },
+      { label: "Precio del arroz paddy verde", value: "$1.522.240 por tonelada", source: "Fedearroz, septiembre de 2026" },
+      { label: "Dólar", value: "$3.162", source: "TRM del 29 de octubre de 2026" },
+      { label: "Equipo RiceVi", value: "US$ 1.200–1.300", source: "Se usa el valor alto para calcular el pago" },
+    ],
+  },
 };
 
 export const PROCESS = {
@@ -220,6 +250,52 @@ export const DEMO = {
   honest:
     "Todavía marca más área de la que hay: hoy es un detector de hojas, no un medidor calibrado. Calibrarlo con muestras físicas de la tolva es el siguiente paso.",
   test: "Prueba: 6 cuadros de un video que el modelo nunca vio, con 240 hojas anotadas a mano. La regla de color se ajustó con los mismos datos de entrenamiento del modelo.",
+  // Lo que depende de la versión va en «versiones»; los conteos de la prueba
+  // ({anotadas}, {encontradas}…) los calcula la página con las métricas del modelo.
+  ficha: {
+    label: "Ficha del modelo: cómo se entrenó y qué significa cada número",
+    trainTitle: "Cómo se entrenó",
+    numbersTitle: "Qué significa cada número",
+    versiones: {
+      v2: {
+        datos: "24 cuadros para aprender, 2 para el simulacro y 6 de otro video para el examen",
+        hojas: "1.557",
+        epocas: "25 vueltas de 1.600 recortes: 40.000 en total",
+        elegida: "La vuelta 8, con 0,58 en el simulacro (la última sacó 0,57)",
+        umbral: "0,6",
+        tiempo: "54 minutos en una GPU GTX 1650 · semilla 42",
+        area: "Hoy marca más del doble del área anotada a mano: es un detector de hojas, no un medidor calibrado.",
+      },
+      v1: {
+        datos: "10 cuadros para aprender, 2 para el simulacro y 6 de otro video para el examen",
+        hojas: "325",
+        epocas: "40 vueltas de 1.600 recortes: 64.000 en total",
+        elegida: "La vuelta 34, con 0,62 en el simulacro",
+        umbral: "0,4",
+        tiempo: "86 minutos en una GPU GTX 1650 · semilla 42",
+        area: "La versión 1 marcaba unas 5 veces menos área de la anotada: se le escapaba la mitad de las hojas.",
+      },
+    },
+    train: [
+      { term: "Entrenamiento, validación y prueba", value: "datos", text: "Como preparar a un estudiante: aprende con ejercicios resueltos (entrenamiento), un simulacro decide cuándo parar y qué tan exigente ser (validación), y la nota sale de un examen con preguntas que nunca vio (prueba). El examen es de otro video para que no haya preguntas copiadas: eso sería fuga de datos." },
+      { term: "Hojas marcadas a mano", value: "hojas", text: "Son las respuestas correctas con las que aprende. Cada hoja se marcó como una línea con su grosor." },
+      { term: "Punto de partida", fixed: "Transfer learning desde ImageNet", text: "El modelo ya sabía ver bordes, texturas y colores porque antes vio millones de fotos generales. Nosotros solo le enseñamos qué es una hoja en la tolva." },
+      { term: "Épocas", value: "epocas", text: "Una época es una vuelta de estudio: mira recortes de las fotos, compara lo que marcó con lo marcado a mano y se corrige un poco." },
+      { term: "Época elegida", value: "elegida", text: "Después de cada vuelta presentó el simulacro y se guardó la versión con mejor nota (Dice: de 0 a 1, cuánto coincide lo que marca con lo marcado a mano). Más vueltas no siempre es mejor: puede empezar a memorizar en vez de aprender. La regla se fijó antes de entrenar." },
+      { term: "Umbral", value: "umbral", text: "El modelo le da a cada píxel una probabilidad de ser hoja. El umbral es desde cuánto se pinta de naranja: con 0,6, solo lo que cree en un 60 % o más. Se probaron valores de 0,20 a 0,80 en el simulacro y se quedó el mejor." },
+      { term: "Optimizador", fixed: "AdamW, paso de 0,001", text: "Es la forma de corregirse: después de cada error decide cuánto mover cada uno de sus 4,18 millones de parámetros. El paso arranca corto, crece y se achica al final para afinar." },
+      { term: "Función de pérdida", fixed: "BCE con peso 5 + Dice", text: "Es la fórmula que califica cada intento. Menos del 1 % de los píxeles son hoja: un modelo que dijera «todo es grano» acertaría el 99 % y no serviría. Por eso equivocarse en un píxel de hoja cuesta 5 veces más (BCE con peso 5), y Dice califica cuánto se superpone lo marcado con lo real." },
+      { term: "Arquitectura", fixed: "U-Net con MobileNetV3", text: "La U-Net marca píxel por píxel, que es lo que se necesita con hojas de 3 píxeles de ancho. MobileNetV3 está hecha para procesadores pequeños, como el de la Raspberry Pi." },
+      { term: "Tiempo de entrenamiento", value: "tiempo", text: "Con la semilla fija, repetir el entrenamiento da prácticamente el mismo resultado." },
+    ],
+    numbers: [
+      { term: "El porcentaje grande", text: "De todos los píxeles del cuadro completo, cuántos pintó el modelo de naranja. Es área de la foto, no peso. {area}" },
+      { term: "Hojas que encuentra", text: "En el examen hay {anotadas} fragmentos de hoja marcados a mano (240 hojas; las que se tocan cuentan como uno). El modelo tocó {encontradas}; la regla de color, {encontradasRegla}." },
+      { term: "Error en el porcentaje", text: "En cada uno de los 6 cuadros se resta el porcentaje del modelo menos el anotado a mano, sin signo, y se promedia." },
+      { term: "De lo que marca, es hoja", text: "El modelo pintó {manchas} manchas y {aciertos} tocan una hoja marcada. La regla de color pintó {manchasRegla} y solo {aciertosRegla} tocan una hoja: pinta casi todo de verde." },
+      { term: "La regla de color", text: "La comparación más simple: un píxel es hoja si su color pasa tres umbrales. Se ajustó con las mismas fotos de entrenamiento del modelo, para que la comparación sea justa." },
+    ],
+  },
 };
 
 // Antes y después del corte: aún sin modelo (ver EjemplosCorte.jsx).

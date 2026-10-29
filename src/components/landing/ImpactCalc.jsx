@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { IMPACT } from "@/content/landing.js";
+import { Desplegable } from "@/components/landing/Desplegable.jsx";
 
 /**
  * Cifras de recuperación por escenario. Un selector de dos opciones
@@ -46,6 +47,39 @@ export function ImpactCalc() {
           {IMPACT.cost} Se pagaría en unas <span className="font-semibold text-paper">{s.payback} hectáreas</span> cosechadas.
         </li>
       </ul>
+
+      <Desplegable titulo={IMPACT.method.label} className="mt-10">
+        <p className="max-w-3xl text-base text-paper/75">{IMPACT.method.lead}</p>
+        <div className="mt-8 grid gap-10 pb-8 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-straw">{IMPACT.method.inputsTitle}</h3>
+            <dl className="mt-3 divide-y divide-paper/10">
+              {IMPACT.method.inputs.map((d) => (
+                <div key={d.label} className="py-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                    <dt className="text-paper/85">{d.label}</dt>
+                    <dd className="font-semibold text-paper">{d.value}</dd>
+                  </div>
+                  <dd className="mt-1 text-sm text-paper/55">{d.source}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-straw">
+              {IMPACT.method.stepsTitle} · {s.label}
+            </h3>
+            <ol className="mt-3 divide-y divide-paper/10" aria-live="polite">
+              {s.steps.map(([que, cuenta]) => (
+                <li key={que} className="py-3">
+                  <p className="text-paper/85">{que}</p>
+                  <p className="mt-1 font-mono text-sm text-paper">{cuenta}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </Desplegable>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Play, Stop, UploadSimple } from "@phosphor-icons/react";
 import { DEMO } from "@/content/landing.js";
+import { Desplegable } from "@/components/landing/Desplegable.jsx";
 
 /*
  * Demo del modelo de la tolva.
@@ -478,6 +479,55 @@ function Metricas({ modelo, regla, version }) {
       <div className="mt-8 grid gap-6 border-t border-paper/15 pt-8 text-sm text-paper/60 md:grid-cols-2">
         <p>{DEMO.honest}</p>
         <p>{DEMO.test}</p>
+      </div>
+      <Desplegable titulo={DEMO.ficha.label} className="mt-10">
+        <FichaModelo modelo={modelo} regla={regla} carpeta={version?.carpeta} />
+      </Desplegable>
+    </div>
+  );
+}
+
+// Los conteos salen de las mismas métricas que las tarjetas, así no pueden contradecirse.
+function FichaModelo({ modelo, regla, carpeta }) {
+  const F = DEMO.ficha;
+  const cfg = F.versiones[carpeta] ?? F.versiones.v2;
+  const n = (x) => Math.round(x).toLocaleString("es-CO");
+  const vars = {
+    area: cfg.area,
+    anotadas: n(modelo["fragmentos anotados"]),
+    encontradas: n(modelo["fragmentos anotados"] * modelo["recall fragmentos"]),
+    encontradasRegla: n(regla["fragmentos anotados"] * regla["recall fragmentos"]),
+    manchas: n(modelo["fragmentos predichos"]),
+    aciertos: n(modelo["fragmentos predichos"] * modelo["precisión fragmentos"]),
+    manchasRegla: n(regla["fragmentos predichos"]),
+    aciertosRegla: n(regla["fragmentos predichos"] * regla["precisión fragmentos"]),
+  };
+  const rellenar = (t) => t.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+
+  return (
+    <div className="grid gap-10 pb-8 pt-2 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <h4 className="text-sm font-semibold uppercase tracking-wider text-straw">{F.trainTitle}</h4>
+        <dl className="mt-3 divide-y divide-paper/10">
+          {F.train.map((f) => (
+            <div key={f.term} className="py-4">
+              <dt className="font-semibold text-paper">{f.term}</dt>
+              <dd className="mt-1 font-mono text-sm text-straw">{f.fixed ?? cfg[f.value]}</dd>
+              <dd className="mt-2 text-sm text-paper/65">{f.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold uppercase tracking-wider text-straw">{F.numbersTitle}</h4>
+        <dl className="mt-3 divide-y divide-paper/10">
+          {F.numbers.map((f) => (
+            <div key={f.term} className="py-4">
+              <dt className="font-semibold text-paper">{f.term}</dt>
+              <dd className="mt-2 text-sm text-paper/65">{rellenar(f.text)}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </div>
   );
