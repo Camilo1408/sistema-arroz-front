@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, CircleDashed, Circle } from "@phosphor-icons/react";
-import { PROBLEM, IMPACT, PROCESS, DEMO, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
+import { PROBLEM, IMPACT, PROCESS, DEMO, NEXT_CAMERAS, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
 import { SiteNav } from "@/components/landing/SiteNav.jsx";
 import { ScrollFilm } from "@/components/landing/ScrollFilm.jsx";
 import { TaglineReveal } from "@/components/landing/TaglineReveal.jsx";
@@ -10,6 +10,7 @@ import { Faq } from "@/components/landing/Faq.jsx";
 import { Reveal } from "@/components/landing/Reveal.jsx";
 import { Photo } from "@/components/landing/Photo.jsx";
 import { TolvaDemo } from "@/components/landing/TolvaDemo.jsx";
+import { EjemplosCorte } from "@/components/landing/EjemplosCorte.jsx";
 
 /* ── Encabezado de sección ───────────────────────────────────────── */
 function SectionHead({ eyebrow, title, children, tone = "light" }) {
@@ -136,6 +137,14 @@ export default function LandingPage() {
               <TolvaDemo />
             </Reveal>
           </div>
+        </section>
+
+        {/* ── Antes y después del corte: ejemplos sin modelo ──────── */}
+        <section id="corte" className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <SectionHead eyebrow={NEXT_CAMERAS.eyebrow} title={NEXT_CAMERAS.title}>
+            <p className="mt-6 text-lg text-ink-soft">{NEXT_CAMERAS.intro}</p>
+          </SectionHead>
+          <EjemplosCorte />
         </section>
 
         {/* ── Sistema ─────────────────────────────────────────────── */}

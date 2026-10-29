@@ -87,6 +87,18 @@ p, li, dd { text-wrap: pretty; }
 }
 .scan-line { animation: scan 1.6s var(--ease-fluid) infinite; }
 
+/* ─── Ejemplos del corte: los recuadros se dibujan al aparecer ── */
+.zona {
+  opacity: 0;
+  transform: scale(1.08);
+  transition:
+    opacity 700ms var(--ease-fluid),
+    transform 700ms var(--ease-fluid);
+  transition-delay: var(--zona-delay, 0ms);
+  box-shadow: 0 0 0 1px rgb(27 38 28 / 0.35);
+}
+.is-visible .zona { opacity: 1; transform: none; }
+
 /* ─── Preguntas: apertura suave con grid-rows ────────────────── */
 .faq-body {
   display: grid;
@@ -97,7 +109,7 @@ p, li, dd { text-wrap: pretty; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal, .zona { opacity: 1; transform: none; transition: none; }
   .tagline-word { color: rgb(var(--paper)); transition: none; }
   .tagline-word.is-accent { color: rgb(var(--straw)); }
   *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }
