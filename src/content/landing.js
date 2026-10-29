@@ -18,11 +18,11 @@ export const NAV_LINKS = [
 
 export const HERO = {
   // Cifras del Anexo 2: pérdida del cabezal (1,44 %) en la producción del
-  // Huila 2025 al precio de junio de 2026, y escenario de reducirla a la mitad.
-  title: ["Cada año el Huila deja", "$4.560 millones de arroz en el lote"],
-  highlight: "$4.560 millones",
+  // Huila 2025 al precio de septiembre de 2026, y escenario de reducirla a la mitad.
+  title: ["Cada año el Huila deja", "$5.180 millones de arroz en el lote"],
+  highlight: "$5.180 millones",
   subtitle:
-    "Son 3.400 toneladas que se pierden solo en el cabezal. Con RiceVi, reducir esa pérdida a la mitad recuperaría 1.700 toneladas y unos $2.280 millones al año.",
+    "Son 3.400 toneladas que se pierden solo en el cabezal. Con RiceVi, reducir esa pérdida a la mitad recuperaría 1.700 toneladas y unos $2.590 millones al año.",
   cta: { label: "Recorrer el lote", href: "#escena-2" },
   secondary: { label: "Ir al problema", href: "#problema" },
   proof: ["4 cámaras", "3 sensores y un GPS", "Ninguna conexión a la máquina"],
@@ -115,7 +115,9 @@ export const TAGLINE =
 
 // Escenarios calculados en el Anexo 2 con el 1,44 % del cabezal [1],
 // el rendimiento del Huila (7,40 t/ha) y su producción 2025 [3], y el
-// precio del arroz paddy verde de junio de 2026, $1,34 millones/t [6].
+// precio del arroz paddy verde de septiembre de 2026, $1.522.240/t (Fedearroz).
+// Equipo: US$ 1.200–1.300 a la TRM del 29-oct-2026 ($3.162); el pago se
+// calcula con el extremo alto.
 export const IMPACT = {
   eyebrow: "Impacto",
   title: "Lo que se recuperaría en el Huila",
@@ -126,30 +128,30 @@ export const IMPACT = {
       id: "mitad",
       label: "Si se reduce a la mitad",
       totalAfter: "6,45 %",
-      payback: "56",
+      payback: "50",
       figures: [
-        { scale: "Por hectárea", amount: "≈ 53 kg", money: "≈ $71.400" },
-        { scale: "Un lote de 10 hectáreas", amount: "≈ 530 kg", money: "≈ $714.000" },
-        { scale: "Un año en el Huila", amount: "≈ 1.700 t", money: "≈ $2.280 millones" },
+        { scale: "Por hectárea", amount: "≈ 53 kg", money: "≈ $81.100" },
+        { scale: "Un lote de 10 hectáreas", amount: "≈ 530 kg", money: "≈ $811.000" },
+        { scale: "Un año en el Huila", amount: "≈ 1.700 t", money: "≈ $2.590 millones" },
       ],
     },
     {
       id: "techo",
       label: "Si se elimina",
       totalAfter: "5,73 %",
-      payback: "28",
+      payback: "25",
       figures: [
-        { scale: "Por hectárea", amount: "≈ 107 kg", money: "≈ $142.800" },
-        { scale: "Un lote de 10 hectáreas", amount: "≈ 1,07 t", money: "≈ $1,4 millones" },
-        { scale: "Un año en el Huila", amount: "≈ 3.400 t", money: "≈ $4.560 millones" },
+        { scale: "Por hectárea", amount: "≈ 107 kg", money: "≈ $162.200" },
+        { scale: "Un lote de 10 hectáreas", amount: "≈ 1,07 t", money: "≈ $1,6 millones" },
+        { scale: "Un año en el Huila", amount: "≈ 3.400 t", money: "≈ $5.180 millones" },
       ],
     },
   ],
-  cost: "El equipo cuesta del orden de US$ 1.000 por cosechadora, unos $4 millones, sin pagos mensuales.",
+  cost: "El equipo cuesta entre US$ 1.200 y 1.300 por cosechadora, unos $3,8 a 4,1 millones, sin pagos mensuales.",
   indirect:
     "Además, la velocidad de avance y el molinete influyen en lo que se pierde en la trilla y la limpieza. Ese efecto se medirá en campo y no se suma a estas cifras.",
   note:
-    "Son escenarios calculados, no resultados medidos. Fuentes: Chaparro et al. (1984); DANE y Fedearroz, Encuesta Nacional de Arroz Mecanizado 2025; precio de Fedearroz de junio de 2026.",
+    "Son escenarios calculados, no resultados medidos. Fuentes: Chaparro et al. (1984); DANE y Fedearroz, Encuesta Nacional de Arroz Mecanizado 2025; precio del arroz paddy verde de Fedearroz, septiembre de 2026.",
 };
 
 export const PROCESS = {
@@ -317,7 +319,7 @@ export const SYSTEM = {
   facts: [
     { value: "7", label: "módulos ESP32, uno por cámara o sensor" },
     { value: "3", label: "modelos de visión artificial" },
-    { value: "≈ US$ 1.000", label: "de hardware por cosechadora" },
+    { value: "US$ 1.200–1.300", label: "de hardware por cosechadora" },
     { value: "0", label: "costos de nube o conectividad" },
   ],
 };
