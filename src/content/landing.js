@@ -131,10 +131,11 @@ export const IMPACT = {
       payback: "50",
       steps: [
         ["Pérdida del cabezal por hectárea", "7,40 t/ha × 1,44 % = 106,6 kg"],
-        ["Lo que se recupera por hectárea", "106,6 kg ÷ 2 = 53,3 kg × $1.522 por kg ≈ $81.100"],
+        ["Precio por kilo", "$1.522.240 por tonelada ÷ 1.000 kg = $1.522 por kg"],
+        ["Lo que se recupera por hectárea", "106,6 kg ÷ 2 (la mitad) = 53,3 kg × $1.522 por kg ≈ $81.100"],
         ["Un lote de 10 hectáreas", "53,3 kg × 10 ≈ 530 kg · $81.100 × 10 ≈ $811.000"],
-        ["Un año en el Huila", "236.475 t × 1,44 % = 3.405 t ÷ 2 = 1.703 t × $1.522.240 ≈ $2.590 millones"],
-        ["Pérdida total", "7,17 % − 0,72 % = 6,45 %"],
+        ["Un año en el Huila", "236.475 t × 1,44 % = 3.405 t ÷ 2 (la mitad) = 1.703 t × $1.522.240 ≈ $2.590 millones"],
+        ["Pérdida total", "1,44 % ÷ 2 (la mitad del cabezal) = 0,72 % · 7,17 % − 0,72 % = 6,45 %"],
         ["Pago del equipo", "US$ 1.300 × $3.162 ≈ $4,1 millones ÷ $81.100 por ha ≈ 50 ha"],
       ],
       figures: [
@@ -150,10 +151,11 @@ export const IMPACT = {
       payback: "25",
       steps: [
         ["Pérdida del cabezal por hectárea", "7,40 t/ha × 1,44 % = 106,6 kg"],
-        ["Lo que se recupera por hectárea", "106,6 kg × $1.522 por kg ≈ $162.200"],
+        ["Precio por kilo", "$1.522.240 por tonelada ÷ 1.000 kg = $1.522 por kg"],
+        ["Lo que se recupera por hectárea", "106,6 kg (todo lo del cabezal) × $1.522 por kg ≈ $162.200"],
         ["Un lote de 10 hectáreas", "106,6 kg × 10 ≈ 1,07 t · $162.200 × 10 ≈ $1,6 millones"],
         ["Un año en el Huila", "236.475 t × 1,44 % = 3.405 t × $1.522.240 ≈ $5.180 millones"],
-        ["Pérdida total", "7,17 % − 1,44 % = 5,73 %"],
+        ["Pérdida total", "7,17 % − 1,44 % (todo el cabezal) = 5,73 %"],
         ["Pago del equipo", "US$ 1.300 × $3.162 ≈ $4,1 millones ÷ $162.200 por ha ≈ 25 ha"],
       ],
       figures: [
