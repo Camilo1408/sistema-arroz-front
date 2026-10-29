@@ -224,9 +224,9 @@ export const DEMO = {
 // Los recuadros van en % de la imagen y se marcaron a mano.
 export const NEXT_CAMERAS = {
   eyebrow: "Lo que sigue",
-  title: "Las otras dos cámaras ya saben qué buscar",
+  title: "La cámara de adelante ya sabe qué buscar",
   intro:
-    "Para el corte todavía no hay modelo: lo entrenaremos con el dataset de la campaña de noviembre. Pero lo que esas cámaras tendrán que ver ya está en el lote.",
+    "Para el corte todavía no hay modelo: lo entrenaremos con el dataset de la campaña de noviembre. Pero lo que esa cámara tendrá que ver ya está en el lote.",
   badge: "Ejemplo · todavía sin modelo",
   items: [
     {
@@ -244,22 +244,6 @@ export const NEXT_CAMERAS = {
         { x: 29, y: 52, w: 34, h: 24, label: "Acame" },
         { x: 70, y: 59, w: 29, h: 16, label: "Acame" },
         { x: 0.5, y: 30, w: 11, h: 9, label: "Cosechadora" },
-      ],
-    },
-    {
-      id: "rastrojo",
-      cam: "CAM02 · CAM03",
-      tag: "Después del corte",
-      title: "El rastrojo que deja el cabezal",
-      text: "Detrás del cabezal quedan los tallos cortados sobre el barro. Entre ellos cae el grano que se pierde en el corte: es el indicador directo de la pérdida, y hoy nadie lo mide durante la cosecha.",
-      task: "contar el grano útil que queda en el suelo, en la franja recién cortada, y comparar antes y después de cada ajuste.",
-      note: "Cuadro de un video de prueba tomado desde el cabezal; no es la vista final de la cámara. Zonas marcadas a mano.",
-      img: "rastrojo",
-      ratio: "16 / 9",
-      alt: "Vista desde el cabezal de la cosechadora hacia el suelo: macollas de rastrojo recién cortado sobre barro",
-      boxes: [
-        { x: 22, y: 36, w: 22, h: 40, label: "Rastrojo" },
-        { x: 6, y: 43, w: 14, h: 25, label: "Rastrojo" },
       ],
     },
   ],
