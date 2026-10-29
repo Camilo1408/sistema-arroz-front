@@ -382,6 +382,12 @@ export const STATUS = {
       title: "Fase 2, primeras salidas con los modelos",
       text: "La inteligencia artificial funcionando en la cabina y la pérdida medida en el lote.",
     },
+    {
+      when: "Marzo y abril de 2027",
+      tone: "next",
+      title: "Calibración e informe de pérdida",
+      text: "Contraste con muestras físicas de tolva y primer informe de pérdida medida para los productores.",
+    },
   ],
 };
 
