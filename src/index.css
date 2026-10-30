@@ -99,6 +99,13 @@ p, li, dd { text-wrap: pretty; }
 }
 .is-visible .zona { opacity: 1; transform: none; }
 
+/* ─── Maqueta del celular del operario: entra suave ──────────── */
+@keyframes aparecer {
+  from { opacity: 0; transform: translate3d(0, 1.5rem, 0) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.aparecer { animation: aparecer 700ms var(--ease-fluid) both; }
+
 /* ─── Comparativa: las barras de precio crecen al aparecer ────── */
 .barra {
   transform: scaleX(0);

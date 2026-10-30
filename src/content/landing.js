@@ -496,7 +496,8 @@ export const SYSTEM = {
       y: 46,
       title: "Central en la cabina",
       ids: "RPI01",
-      text: "Una Raspberry Pi 5 con batería propia recibe, verifica y guarda todo. El operario la consulta desde un navegador.",
+      text: "Una Raspberry Pi 5 con batería propia recibe, verifica y guarda todo. El operario la consulta desde un navegador, en su celular o tablet.",
+      cabina: true,
     },
     {
       n: 7,
@@ -507,6 +508,27 @@ export const SYSTEM = {
       text: "Dentro de la tolva, con su luz pulsada y una referencia de color.",
     },
   ],
+  // Maqueta de la pantalla del operario (CabinaMovil.jsx), copiada de
+  // central/web/hmi.html. Solo el % de la tolva es real (modelo v2, cuadro 0030).
+  cabina: {
+    session: "cosechadora 01",
+    mode: "modelo v2 · tolva",
+    cams: [
+      { name: "Frontal · acame", img: "/img/ejemplos/acame-800.webp" },
+      { name: "Posterior izq.", img: "/img/arrocera_cosechada-800.webp" },
+      { name: "Posterior der.", img: "/img/arrocera_cosechada-800.webp", mirror: true },
+      { name: "Tolva", img: "/demo-tolva/IMG_1577_0030-completo.webp", value: "2,83 %", age: "hace 0,8 s" },
+    ],
+    machine: [
+      ["Molinete", "32,0 rpm", "hace 0,4 s"],
+      ["Velocidad (GPS)", "4,8 km/h", "hace 0,5 s"],
+      ["Altura izq.", "180 mm", "hace 0,3 s"],
+      ["Altura der.", "176 mm", "hace 0,3 s"],
+      ["GPS", "9 sat. · HDOP 1,1", ""],
+    ],
+    nodes: "7 de 7 nodos en línea",
+    label: "Maqueta de la pantalla de la cabina. Datos de ejemplo, salvo el % de la tolva, que es del modelo real.",
+  },
   facts: [
     { value: "7", label: "módulos ESP32, uno por cámara o sensor" },
     { value: "3", label: "modelos de visión artificial" },
