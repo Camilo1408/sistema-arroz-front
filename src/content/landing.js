@@ -185,8 +185,8 @@ export const IMPACT = {
       { label: "Equipo RiceVi", value: "US$ 1.200–1.300", source: "Se usa el valor alto para calcular el pago" },
     ],
   },
-  // Quinto Censo Nacional Arrocero 2023 (DANE y Fedearroz) y Fedearroz en la
-  // Cámara de Representantes (abril de 2025).
+  // Quinto Censo Nacional Arrocero 2023 (DANE y Fedearroz) y Banco Agrario
+  // (unos 400.000 empleos directos e indirectos en el cultivo de arroz).
   beneficiaries: {
     title: "¿Quién gana?",
     items: [
@@ -202,11 +202,11 @@ export const IMPACT = {
       },
       {
         who: "Toda la cadena",
-        stat: "500.000",
-        text: "familias sostiene el arroz en Colombia, según Fedearroz. El molino, además, recibe grano más limpio.",
+        stat: "400.000",
+        text: "empleos directos e indirectos genera el arroz en Colombia. El molino, además, recibe grano más limpio.",
       },
     ],
-    source: "Quinto Censo Nacional Arrocero 2023, DANE y Fedearroz; Fedearroz ante la Cámara de Representantes, abril de 2025.",
+    source: "Quinto Censo Nacional Arrocero 2023, DANE y Fedearroz; empleos: Banco Agrario de Colombia.",
   },
 };
 
