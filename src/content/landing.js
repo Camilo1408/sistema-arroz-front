@@ -6,12 +6,13 @@
 // 22-oct-2026) y docs/01–03 v1.2. Alcance: corte y tolva.
 // Para actualizar la página basta con editar este archivo.
 
+// En el orden del guion del pitch: lo que se dice es lo que se va viendo.
 export const NAV_LINKS = [
   { label: "Problema", href: "#problema" },
   { label: "Impacto", href: "#impacto" },
-  { label: "Cómo funciona", href: "#proceso" },
-  { label: "IA en vivo", href: "#ia" },
+  { label: "Por qué RiceVi", href: "#comparativa" },
   { label: "Sistema", href: "#sistema" },
+  { label: "IA en vivo", href: "#ia" },
   { label: "Avance", href: "#estado" },
   { label: "Equipo", href: "#equipo" },
 ];
@@ -184,6 +185,118 @@ export const IMPACT = {
       { label: "Equipo RiceVi", value: "US$ 1.200–1.300", source: "Se usa el valor alto para calcular el pago" },
     ],
   },
+  // Quinto Censo Nacional Arrocero 2023 (DANE y Fedearroz) y Fedearroz en la
+  // Cámara de Representantes (abril de 2025).
+  beneficiaries: {
+    title: "¿Quién gana?",
+    items: [
+      {
+        who: "Las familias productoras",
+        stat: "6 de cada 10",
+        text: "productores viven sobre todo del arroz, y cerca del 70 % del área se siembra en tierra arrendada. El grano que se queda en el lote ya lo pagaron.",
+      },
+      {
+        who: "El contratista y su operario",
+        stat: "1 de cada 4",
+        text: "combinadas que cosechan arroz tiene más de 10 años. RiceVi se monta en ellas sin tocarlas: el operario ajusta a tiempo y queda un registro de su trabajo.",
+      },
+      {
+        who: "Toda la cadena",
+        stat: "500.000",
+        text: "familias sostiene el arroz en Colombia, según Fedearroz. El molino, además, recibe grano más limpio.",
+      },
+    ],
+    source: "Quinto Censo Nacional Arrocero 2023, DANE y Fedearroz; Fedearroz ante la Cámara de Representantes, abril de 2025.",
+  },
+};
+
+// Comparativa con lo que existe (ver Comparativa.jsx). Cada casilla sale de la
+// ficha del fabricante o de prensa del sector; «no anunciado» significa que no
+// lo encontramos, no que no exista. Revisado el 29 de octubre de 2026.
+export const COMPARE = {
+  eyebrow: "Por qué RiceVi",
+  title: "Lo que una cosechadora nueva no trae",
+  intro:
+    "Las marcas grandes automatizan la trilla y la limpieza. El cabezal, donde empieza la pérdida, se lo dejan al operario.",
+  price: {
+    them: { label: "Cosechadora nueva de gama alta", value: "≈ $2.000 millones", note: "John Deere S7 600, unos US$ 625.000. Hay que cambiar de máquina." },
+    us: { label: "RiceVi", value: "≈ $4 millones", note: "US$ 1.200–1.300, en la cosechadora que ya tienen. Sin nube ni mensualidades." },
+    ratio: "Casi 500 veces menos",
+    // Para la barra: proporción de RiceVi frente a la máquina nueva.
+    share: 1300 / 624600,
+  },
+  columns: [
+    { key: "antes", label: "Antes del corte" },
+    { key: "despues", label: "Detrás del cabezal" },
+    { key: "grano", label: "Calidad del grano" },
+    { key: "arroz", label: "Arroz" },
+    { key: "marca", label: "Cualquier marca y edad" },
+  ],
+  rows: [
+    {
+      name: "RiceVi",
+      kind: "Kit para la cosechadora que ya tienen",
+      us: true,
+      cells: {
+        antes: ["si", "Clasifica el acame · en entrenamiento"],
+        despues: ["si", "Grano en el rastrojo · en entrenamiento"],
+        grano: ["si", "Material vegetal en la tolva · entrenado"],
+        arroz: ["si", "Entrenado con arroz del Huila"],
+        marca: ["si", "Sin conectarse a la máquina"],
+      },
+    },
+    {
+      name: "John Deere S7",
+      kind: "Cosechadora nueva",
+      cells: {
+        antes: ["parcial", "Mide altura para regular la velocidad"],
+        despues: ["no", ""],
+        grano: ["si", "Cámara de grano limpio"],
+        arroz: ["no", "Pensada para maíz y soya"],
+        marca: ["no", "Solo la S7 nueva"],
+      },
+    },
+    {
+      name: "Kubota DRH1200A",
+      kind: "Cosechadora nueva, Japón",
+      cells: {
+        antes: ["si", "Detecta acame"],
+        despues: ["no", ""],
+        grano: ["no", ""],
+        arroz: ["si", "Para el mercado japonés"],
+        marca: ["no", "Solo esa máquina"],
+      },
+    },
+    {
+      name: "CLAAS · New Holland · Case IH · Fendt",
+      kind: "Cosechadoras nuevas",
+      cells: {
+        antes: ["parcial", "CLAAS: altura con láser"],
+        despues: ["no", ""],
+        grano: ["si", "Cámara de grano limpio"],
+        arroz: ["parcial", "New Holland lo incluye"],
+        marca: ["no", "Solo sus máquinas"],
+      },
+    },
+    {
+      name: "Farmwave · Yield EyeQ",
+      kind: "Cámaras que se instalan aparte",
+      cells: {
+        antes: ["no", ""],
+        despues: ["si", "Cabezal y rastrojo"],
+        grano: ["no", ""],
+        arroz: ["no", "No anunciado"],
+        marca: ["si", "Se montan en otras marcas"],
+      },
+    },
+  ],
+  verdict: "Ninguno de los que revisamos cubre las cinco columnas.",
+  points: [
+    { title: "Se paga en unas 50 hectáreas", text: "Si recupera la mitad de la pérdida del cabezal: unos $81.100 por hectárea frente a unos $4,1 millones del equipo." },
+    { title: "No se queda en el arroz", text: "Para maíz, trigo u otro cereal, el equipo es el mismo: solo se reentrenan los modelos con fotos de ese cultivo." },
+    { title: "Todo en la cabina", text: "Los modelos corren en la Raspberry Pi, sin internet. Los datos no salen de la máquina." },
+  ],
+  note: "«En entrenamiento»: la cámara está lista y el modelo se entrena con el dataset de la campaña de noviembre. Fuentes: fichas de John Deere, Kubota, CLAAS, New Holland, Case IH y Fendt; Farm Progress y Future Farming (Farmwave); Grainews (Yield EyeQ); precio de distribuidor de la S7 600 en EE. UU., 2026, a la TRM del 29 de octubre; Quinto Censo Nacional Arrocero 2023.",
 };
 
 export const PROCESS = {
@@ -495,8 +608,14 @@ export const TEAM = {
   members: [
     { name: "Cesar Camilo Hoyos Diaz", role: "Desarrollador" },
     { name: "Alvaro Julian Delgado Mena", role: "Desarrollador" },
-    { name: "Ferley Medina Rojas", role: "Asesor, profesor de Ingeniería de Software" },
+    { name: "Juan Antonio Castro Silva", role: "Asesor · Doctor en Ingeniería Informática" },
+    { name: "Ferley Medina Rojas", role: "Asesor · Doctor en Ingeniería" },
   ],
+  group: {
+    name: "Grupo de investigación La Colonia",
+    lab: "Laboratorio de Inteligencia Artificial",
+    university: "Universidad Surcolombiana",
+  },
 };
 
 export const FOOTER = {

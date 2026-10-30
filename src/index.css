@@ -99,6 +99,14 @@ p, li, dd { text-wrap: pretty; }
 }
 .is-visible .zona { opacity: 1; transform: none; }
 
+/* ─── Comparativa: las barras de precio crecen al aparecer ────── */
+.barra {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1400ms var(--ease-fluid) 200ms;
+}
+.is-visible .barra { transform: none; }
+
 /* ─── Preguntas: apertura suave con grid-rows ────────────────── */
 .faq-body {
   display: grid;
@@ -109,7 +117,7 @@ p, li, dd { text-wrap: pretty; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .zona { opacity: 1; transform: none; transition: none; }
+  .reveal, .zona, .barra { opacity: 1; transform: none; transition: none; }
   .tagline-word { color: rgb(var(--paper)); transition: none; }
   .tagline-word.is-accent { color: rgb(var(--straw)); }
   *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }

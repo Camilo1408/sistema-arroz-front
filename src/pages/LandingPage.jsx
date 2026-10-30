@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, CircleDashed, Circle } from "@phosphor-icons/react";
-import { PROBLEM, IMPACT, PROCESS, DEMO, NEXT_CAMERAS, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
+import { PROBLEM, IMPACT, COMPARE, PROCESS, DEMO, NEXT_CAMERAS, SYSTEM, PRINCIPLES, STATUS, TEAM, FOOTER } from "@/content/landing.js";
 import { SiteNav } from "@/components/landing/SiteNav.jsx";
 import { ScrollFilm } from "@/components/landing/ScrollFilm.jsx";
 import { TaglineReveal } from "@/components/landing/TaglineReveal.jsx";
@@ -11,6 +11,8 @@ import { Reveal } from "@/components/landing/Reveal.jsx";
 import { Photo } from "@/components/landing/Photo.jsx";
 import { TolvaDemo } from "@/components/landing/TolvaDemo.jsx";
 import { EjemplosCorte } from "@/components/landing/EjemplosCorte.jsx";
+import { Comparativa } from "@/components/landing/Comparativa.jsx";
+import { useAnclasSuaves } from "@/components/landing/useAnclasSuaves.js";
 
 /* ── Encabezado de sección ───────────────────────────────────────── */
 function SectionHead({ eyebrow, title, children, tone = "light" }) {
@@ -35,6 +37,8 @@ const STATUS_ICON = {
 };
 
 export default function LandingPage() {
+  useAnclasSuaves();
+
   return (
     <>
       <a
@@ -83,9 +87,55 @@ export default function LandingPage() {
             <Reveal className="mt-12">
               <ImpactCalc />
             </Reveal>
+
+            <div className="mt-20">
+              <Reveal>
+                <h3 className="text-2xl font-semibold tracking-tight text-paper sm:text-3xl">{IMPACT.beneficiaries.title}</h3>
+              </Reveal>
+              <ul className="mt-8 grid gap-px overflow-hidden rounded-3xl bg-paper/15 md:grid-cols-3">
+                {IMPACT.beneficiaries.items.map((b, i) => (
+                  <Reveal as="li" key={b.who} delay={i * 100} className="bg-ink p-6 sm:p-8">
+                    <p className="text-sm font-semibold text-straw">{b.who}</p>
+                    <p className="mt-3 text-4xl font-bold tracking-tight text-paper">{b.stat}</p>
+                    <p className="mt-2 text-base text-paper/75">{b.text}</p>
+                  </Reveal>
+                ))}
+              </ul>
+              <p className="mt-4 text-xs text-paper/55">{IMPACT.beneficiaries.source}</p>
+            </div>
             <Reveal className="mt-12 grid gap-6 border-t border-paper/15 pt-8 text-sm text-paper/60 md:grid-cols-2">
               <p>{IMPACT.indirect}</p>
               <p>{IMPACT.note}</p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── Por qué RiceVi: comparativa ──────────────────────────── */}
+        <section id="comparativa" className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <SectionHead eyebrow={COMPARE.eyebrow} title={COMPARE.title}>
+            <p className="mt-6 text-lg text-ink-soft">{COMPARE.intro}</p>
+          </SectionHead>
+          <Comparativa />
+        </section>
+
+        {/* ── Sistema ─────────────────────────────────────────────── */}
+        <section id="sistema" className="bg-paper-deep/60 py-24 sm:py-32">
+          <div className="mx-auto max-w-6xl px-6">
+            <SectionHead eyebrow={SYSTEM.eyebrow} title={SYSTEM.title}>
+              <p className="mt-6 text-lg text-ink-soft">{SYSTEM.intro}</p>
+            </SectionHead>
+
+            <Reveal className="mt-12">
+              <HarvesterMap />
+            </Reveal>
+
+            <Reveal as="dl" className="mt-16 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
+              {SYSTEM.facts.map((f) => (
+                <div key={f.label}>
+                  <dt className="text-3xl font-bold tracking-tight text-ink">{f.value}</dt>
+                  <dd className="mt-2 text-sm text-ink-soft">{f.label}</dd>
+                </div>
+              ))}
             </Reveal>
           </div>
         </section>
@@ -147,24 +197,67 @@ export default function LandingPage() {
           <EjemplosCorte />
         </section>
 
-        {/* ── Sistema ─────────────────────────────────────────────── */}
-        <section id="sistema" className="bg-paper-deep/60 py-24 sm:py-32">
-          <div className="mx-auto max-w-6xl px-6">
-            <SectionHead eyebrow={SYSTEM.eyebrow} title={SYSTEM.title}>
-              <p className="mt-6 text-lg text-ink-soft">{SYSTEM.intro}</p>
-            </SectionHead>
+        {/* ── Avance ──────────────────────────────────────────────── */}
+        <section id="estado" className="bg-paper-deep/60">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <SectionHead eyebrow={STATUS.eyebrow} title={STATUS.title}>
+            <p className="mt-4 text-sm text-ink-soft">Actualizado a {STATUS.updated.toLowerCase()}</p>
+          </SectionHead>
 
-            <Reveal className="mt-12">
-              <HarvesterMap />
-            </Reveal>
+          <ol className="relative mt-16 space-y-10 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-line">
+            {STATUS.steps.map((step, i) => {
+              const { Icon, cls } = STATUS_ICON[step.tone];
+              return (
+                <Reveal as="li" key={step.title} delay={i * 80} className="relative grid gap-2 pl-14 md:grid-cols-12 md:gap-8">
+                  <span className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full ${cls}`}>
+                    <Icon weight="bold" className="h-4 w-4" />
+                  </span>
+                  <p className="pt-1 text-sm font-semibold text-field md:col-span-4">{step.when}</p>
+                  <div className="md:col-span-8">
+                    <h3 className={`text-xl font-semibold tracking-tight ${step.tone === "next" ? "text-ink-soft" : "text-ink"}`}>
+                      {step.title}
+                    </h3>
+                    <p className="mt-1 text-base text-ink-soft">{step.text}</p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </ol>
+          </div>
+        </section>
 
-            <Reveal as="dl" className="mt-16 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
-              {SYSTEM.facts.map((f) => (
-                <div key={f.label}>
-                  <dt className="text-3xl font-bold tracking-tight text-ink">{f.value}</dt>
-                  <dd className="mt-2 text-sm text-ink-soft">{f.label}</dd>
-                </div>
-              ))}
+        {/* ── Equipo ──────────────────────────────────────────────── */}
+        <section id="equipo">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 sm:py-32 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <SectionHead eyebrow={TEAM.eyebrow} title={TEAM.title}>
+                <p className="mt-6 text-lg text-ink-soft">{TEAM.intro}</p>
+              </SectionHead>
+              <Reveal as="ul" delay={120} className="mt-10 divide-y divide-line border-y border-line">
+                {TEAM.members.map((m) => (
+                  <li key={m.name} className="flex flex-wrap items-baseline justify-between gap-2 py-5">
+                    <span className="text-xl font-semibold tracking-tight">{m.name}</span>
+                    <span className="text-sm text-ink-soft">{m.role}</span>
+                  </li>
+                ))}
+              </Reveal>
+              <Reveal delay={160} className="mt-8 rounded-2xl bg-paper-deep/70 p-5">
+                <p className="font-semibold text-ink">{TEAM.group.name}</p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {TEAM.group.lab} · {TEAM.group.university}
+                </p>
+              </Reveal>
+            </div>
+            <Reveal as="figure" delay={150} className="lg:col-span-6 lg:col-start-7">
+              <div className="overflow-hidden rounded-3xl">
+                <Photo
+                  name="equipo"
+                  alt="Integrantes del equipo dentro de la cabina de la cosechadora durante una salida de campo"
+                  sizes="(min-width: 1024px) 550px, 100vw"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+              <figcaption className="mt-3 text-sm text-ink-soft">En la cabina de la cosechadora, durante una salida de campo.</figcaption>
             </Reveal>
           </div>
         </section>
@@ -192,35 +285,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Avance ──────────────────────────────────────────────── */}
-        <section id="estado" className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <SectionHead eyebrow={STATUS.eyebrow} title={STATUS.title}>
-            <p className="mt-4 text-sm text-ink-soft">Actualizado a {STATUS.updated.toLowerCase()}</p>
-          </SectionHead>
-
-          <ol className="relative mt-16 space-y-10 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-line">
-            {STATUS.steps.map((step, i) => {
-              const { Icon, cls } = STATUS_ICON[step.tone];
-              return (
-                <Reveal as="li" key={step.title} delay={i * 80} className="relative grid gap-2 pl-14 md:grid-cols-12 md:gap-8">
-                  <span className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full ${cls}`}>
-                    <Icon weight="bold" className="h-4 w-4" />
-                  </span>
-                  <p className="pt-1 text-sm font-semibold text-field md:col-span-4">{step.when}</p>
-                  <div className="md:col-span-8">
-                    <h3 className={`text-xl font-semibold tracking-tight ${step.tone === "next" ? "text-ink-soft" : "text-ink"}`}>
-                      {step.title}
-                    </h3>
-                    <p className="mt-1 text-base text-ink-soft">{step.text}</p>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </ol>
-        </section>
-
         {/* ── Preguntas ───────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-labelledby="preguntas">
+        <section className="mx-auto max-w-6xl px-6 py-24 sm:py-32" aria-labelledby="preguntas">
           <div className="grid gap-12 lg:grid-cols-12">
             <Reveal className="lg:col-span-4">
               <p className="text-sm font-semibold uppercase tracking-widest text-field">Preguntas</p>
@@ -230,36 +296,6 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={120} className="lg:col-span-8">
               <Faq />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ── Equipo ──────────────────────────────────────────────── */}
-        <section id="equipo" className="bg-paper-deep/60">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 sm:py-32 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <SectionHead eyebrow={TEAM.eyebrow} title={TEAM.title}>
-                <p className="mt-6 text-lg text-ink-soft">{TEAM.intro}</p>
-              </SectionHead>
-              <Reveal as="ul" delay={120} className="mt-10 divide-y divide-line border-y border-line">
-                {TEAM.members.map((m) => (
-                  <li key={m.name} className="flex flex-wrap items-baseline justify-between gap-2 py-5">
-                    <span className="text-xl font-semibold tracking-tight">{m.name}</span>
-                    <span className="text-sm text-ink-soft">{m.role}</span>
-                  </li>
-                ))}
-              </Reveal>
-            </div>
-            <Reveal as="figure" delay={150} className="lg:col-span-6 lg:col-start-7">
-              <div className="overflow-hidden rounded-3xl">
-                <Photo
-                  name="equipo"
-                  alt="Integrantes del equipo dentro de la cabina de la cosechadora durante una salida de campo"
-                  sizes="(min-width: 1024px) 550px, 100vw"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              </div>
-              <figcaption className="mt-3 text-sm text-ink-soft">En la cabina de la cosechadora, durante una salida de campo.</figcaption>
             </Reveal>
           </div>
         </section>
