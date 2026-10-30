@@ -125,7 +125,8 @@ export default function LandingPage() {
               <p className="mt-6 text-lg text-ink-soft">{SYSTEM.intro}</p>
             </SectionHead>
 
-            <Reveal className="mt-12">
+            {/* En pantallas anchas la foto sale un poco del margen del texto. */}
+            <Reveal className="mt-12 xl:-mx-16">
               <HarvesterMap />
             </Reveal>
 
@@ -235,9 +236,9 @@ export default function LandingPage() {
               </SectionHead>
               <Reveal as="ul" delay={120} className="mt-10 divide-y divide-line border-y border-line">
                 {TEAM.members.map((m) => (
-                  <li key={m.name} className="flex flex-wrap items-baseline justify-between gap-2 py-5">
-                    <span className="text-xl font-semibold tracking-tight">{m.name}</span>
-                    <span className="text-sm text-ink-soft">{m.role}</span>
+                  <li key={m.name} className="py-5">
+                    <span className="block text-xl font-semibold tracking-tight">{m.name}</span>
+                    <span className="mt-1 block text-sm text-ink-soft">{m.role}</span>
                   </li>
                 ))}
               </Reveal>

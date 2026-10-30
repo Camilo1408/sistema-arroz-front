@@ -12,12 +12,12 @@ export function HarvesterMap() {
   const spot = SYSTEM.hotspots.find((h) => h.n === current);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+    <div className="grid gap-8 lg:grid-cols-[2.1fr_1fr] lg:items-start">
       <figure className="relative overflow-hidden rounded-3xl bg-paper-deep">
         <Photo
           name="cosechadora_cerca"
           alt="Cosechadora de arroz vista de lado, con los puntos donde se instalan las cámaras y los sensores"
-          sizes="(min-width: 1024px) 60vw, 100vw"
+          sizes="(min-width: 1280px) 820px, (min-width: 1024px) 65vw, 100vw"
           className="aspect-[4/3] w-full object-cover"
         />
         {SYSTEM.hotspots.map((h) => (
