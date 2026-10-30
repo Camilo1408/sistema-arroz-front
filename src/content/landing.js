@@ -20,7 +20,7 @@ export const NAV_LINKS = [
 export const HERO = {
   // Cifras del Anexo 2: pérdida del cabezal (1,44 %) en la producción del
   // Huila 2025 al precio de septiembre de 2026, y escenario de reducirla a la mitad.
-  title: ["Cada año el Huila deja", "$5.180 millones de arroz en el lote"],
+  title: ["Cada año el Huila deja en el lote", "$5.180 millones de pesos en arroz"],
   highlight: "$5.180 millones",
   subtitle:
     "Son 3.400 toneladas que se pierden solo en el cabezal. Con RiceVi, reducir esa pérdida a la mitad recuperaría 1.700 toneladas y unos $2.590 millones al año.",
